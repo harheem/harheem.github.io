@@ -3,13 +3,13 @@ title: Harheem
 description: >
   A simple, minimal Jekyll theme for a personal web page and blog, focusing on white space and readability
 
-baseurl: "/blog" # the subpath of your site, e.g. /blog/
+baseurl: "" # the subpath of your site, e.g. /blog/
 url: "https://harheem.github.io" # the base hostname & protocol for your site
 
 author:
   fullname: Harheem
   github: harheem
-  linkedin: https://www.linkedin.com/in/harheemk/
+  linkedin: harheemk
   email: shhr.kre@gmail.com
 
 
