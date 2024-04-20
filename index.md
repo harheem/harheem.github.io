@@ -9,5 +9,5 @@ sitemap:
 <img src="{{ '/assets/img/pudhina.jpg' | prepend: site.baseurl }}" id="about-img">
 
 <div id="describe-text">
-	<p>A simple, minimal Jekyll theme for a personal web page and blog, focusing on white space and readability</p>
+	<p>Passionate about AI and quantum computing, <br> I am an ML engineer who thrives in open-source projects and has a keen interest in Large Language Models.</p>
 </div>
