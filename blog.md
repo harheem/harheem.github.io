@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Blog
-subtitle: Select ramblings of Pudhina
+subtitle: From Personal Study to Public Enlightenment
 ---
 
 <div>
