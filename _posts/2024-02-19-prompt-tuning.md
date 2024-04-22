@@ -5,6 +5,7 @@ subtitle: "The Power of Scale for Parameter-Efficient Prompt Tuning"
 date:   2024-02-19 20:13:50 +0530
 categories: LLM
 author: "Harheem Kim"
+toc: true
 ---
 
 # Prompt Tuning
