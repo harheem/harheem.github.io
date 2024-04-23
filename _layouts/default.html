@@ -6,7 +6,7 @@
     </head>
     <body>
         <div id="section-nav">
-            {% toc %}
+            {{ content | toc_only }}
         </div>
         <div class="wrapper">
             {% include header.html %}
