@@ -19,20 +19,11 @@
 <link href="https://fonts.googleapis.com/css?family=Quicksand" rel="stylesheet">
     </head>
     <body>
-        <div id="section-nav">
-            <ul id="toc" class="section-nav">
-<li class="toc-entry toc-h1"><a href="#document-chunking%EC%89%BD%EA%B3%A0-%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EC%9D%B5%ED%9E%88%EB%8A%94-%EC%8B%A4%EC%A0%84-llm---%EB%AC%B8%EC%84%9C-%EC%B2%AD%ED%82%B9">
-Document Chunking
-쉽고 빠르게 익히는 실전 LLM - 문서 청킹
-</a></li>
-<li class="toc-entry toc-h1"><a href="#문서-청킹-document-chunking">문서 청킹 (Document Chunking)</a></li>
-<li class="toc-entry toc-h1"><a href="#최대-토큰-범위-분할-max-token-window-chunking">최대 토큰 범위 분할 (Max Token Window Chunking)</a></li>
-<li class="toc-entry toc-h1"><a href="#맞춤형-구분-기호-찾기">맞춤형 구분 기호 찾기</a></li>
-<li class="toc-entry toc-h1"><a href="#의미-기반-문서-생성을-위한-클러스터링">의미 기반 문서 생성을 위한 클러스터링</a></li>
-<li class="toc-entry toc-h1"><a href="#청크로-나누지-않고-전체-문서-사용하기">청크로 나누지 않고 전체 문서 사용하기</a></li>
-<li class="toc-entry toc-h1"><a href="#summary">Summary</a></li>
-<li class="toc-entry toc-h1"><a href="#참고한-코드">참고한 코드</a></li>
-</ul>
+        <div class="section-nav">
+            <ul><li>
+<div class="page-title__text">Document Chunking</div>
+<div class="page-title__subtitle">쉽고 빠르게 익히는 실전 LLM - 문서 청킹</div>
+</li><li><a href="#문서-청킹-document-chunking">문서 청킹 (Document Chunking)</a></li><li><a href="#최대-토큰-범위-분할-max-token-window-chunking">최대 토큰 범위 분할 (Max Token Window Chunking)</a></li><li><a href="#맞춤형-구분-기호-찾기">맞춤형 구분 기호 찾기</a></li><li><a href="#의미-기반-문서-생성을-위한-클러스터링">의미 기반 문서 생성을 위한 클러스터링</a></li><li><a href="#청크로-나누지-않고-전체-문서-사용하기">청크로 나누지 않고 전체 문서 사용하기</a></li><li><a href="#summary">Summary</a></li><li><a href="#참고한-코드">참고한 코드</a></li></ul>
         </div>
         <div class="wrapper">
             <header class="header">
@@ -62,13 +53,11 @@ Document Chunking
 </ul>
 </header>
             <h1 class="page-title">
-<a class="anchor" href="#document-chunking%EC%89%BD%EA%B3%A0-%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EC%9D%B5%ED%9E%88%EB%8A%94-%EC%8B%A4%EC%A0%84-llm---%EB%AC%B8%EC%84%9C-%EC%B2%AD%ED%82%B9" aria-hidden="true"><span class="octicon octicon-link"></span></a>
 <div class="page-title__text">Document Chunking</div>
 <div class="page-title__subtitle">쉽고 빠르게 익히는 실전 LLM - 문서 청킹</div>
 </h1>
 
-<h1 id="문서-청킹-document-chunking">
-<a class="anchor" href="#%EB%AC%B8%EC%84%9C-%EC%B2%AD%ED%82%B9-document-chunking" aria-hidden="true"><span class="octicon octicon-link"></span></a>문서 청킹 (Document Chunking)</h1>
+<h1 id="문서-청킹-document-chunking">문서 청킹 (Document Chunking)</h1>
 
 <p>큰 문서를 다룰 때, 전체 문서를 단일 벡터로 임베딩하는 것은 실용적이지 않을때가 많습니다. 이 문제를 해결할 수 있는 방법 중 하나인 문서 청킹에 대해 이야기해보고자 합니다.</p>
 
@@ -76,20 +65,19 @@ Document Chunking
 
 <p>(청킹은 일반적으로 정보를 의미 있는 묶음으로 분류하는 것을 의미합니다. 청크는 의미에 따라 묶여진 정보의 덩어리로 이해할 수 있습니다.)</p>
 
-<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2Fc3a4dc1c-8e9b-4d33-b0d6-c024fe71a7f1%2FUntitled.png?table=block&amp;id=0968fda9-4668-43c8-9da4-3e2a21316153&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="[https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023](https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023)"></p>
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2Fc3a4dc1c-8e9b-4d33-b0d6-c024fe71a7f1%2FUntitled.png?table=block&amp;id=0968fda9-4668-43c8-9da4-3e2a21316153&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="[https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023](https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023)" /></p>
 
 <p><a href="https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023">https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023</a></p>
 
-<h1 id="최대-토큰-범위-분할-max-token-window-chunking">
-<a class="anchor" href="#%EC%B5%9C%EB%8C%80-%ED%86%A0%ED%81%B0-%EB%B2%94%EC%9C%84-%EB%B6%84%ED%95%A0-max-token-window-chunking" aria-hidden="true"><span class="octicon octicon-link"></span></a>최대 토큰 범위 분할 (Max Token Window Chunking)</h1>
+<h1 id="최대-토큰-범위-분할-max-token-window-chunking">최대 토큰 범위 분할 (Max Token Window Chunking)</h1>
 
-<hr>
+<hr />
 
 <p>주어진 최대 크기의 청크로 문서를 나누는 것을 포함합니다. 예를 들어, 최대 토큰 수를 256으로 설정한다면, 256 토큰보다는 작은 청크로 분리가 될 것입니다. 비슷한 크기의 청크를 생성하는 것은 시스템을 일관성 있게 만드는 데 도움이 됩니다.</p>
 
 <p>이 방법은 중요한 텍스트 일부를 잘라낼 수 있어 문맥이 분리가 될 수 있습니다. 이 문제를 보완하기 위해 토큰이 청크 사이에 공유되도록 지정된 값만큼 겹치게 하도록 할 수 있습니다. 이렇게 하면 중복된 토큰이 생기지만, 더 높은 정확도를 기대할 수 있습니다. 이는 아래 코드에서 overlapping_factor에 해당하는 부분입니다.</p>
 
-<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F8cc13022-4b14-4a7f-8d7b-45b47c4090e5%2FUntitled.png?table=block&amp;id=eef0e191-c8bb-485e-a12b-1ade3bf6e920&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="[https://www.pinecone.io/learn/chunking-strategies/](https://www.pinecone.io/learn/chunking-strategies/)"></p>
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F8cc13022-4b14-4a7f-8d7b-45b47c4090e5%2FUntitled.png?table=block&amp;id=eef0e191-c8bb-485e-a12b-1ade3bf6e920&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="[https://www.pinecone.io/learn/chunking-strategies/](https://www.pinecone.io/learn/chunking-strategies/)" /></p>
 
 <p><a href="https://www.pinecone.io/learn/chunking-strategies/">https://www.pinecone.io/learn/chunking-strategies/</a></p>
 
@@ -224,10 +212,9 @@ Document Chunking
 
 <p>중첩을 사용하면 청크의 수가 증가합니다. 중첩 비율이 높을수록 시스템에 더 많은 중복성이 생깁니다. 이 방법은 문서의 자연스러운 구조를 고려하지 않아, 정보가 청크 사이에 나누어지거나 중복된 정보가 있는 청크가 생기게 됩니다. 이러한 현상은 검색 시스템을 혼란스럽게 하게 됩니다.</p>
 
-<h1 id="맞춤형-구분-기호-찾기">
-<a class="anchor" href="#%EB%A7%9E%EC%B6%A4%ED%98%95-%EA%B5%AC%EB%B6%84-%EA%B8%B0%ED%98%B8-%EC%B0%BE%EA%B8%B0" aria-hidden="true"><span class="octicon octicon-link"></span></a>맞춤형 구분 기호 찾기</h1>
+<h1 id="맞춤형-구분-기호-찾기">맞춤형 구분 기호 찾기</h1>
 
-<hr>
+<hr />
 
 <p>청킹 방법을 돕기 위해, PDF에서 페이지 분리나 단락 사이의 새로운 줄과 같은 구분 기호를 찾을 수 있습니다. 주어진 문서에 대해 텍스트 내의 자연스러운 공백을 식별하게 되면 의미 있는 텍스트 단위를 생성하게 될 것입니다. 논문 pdf에서 일반적인 공백 유형을 찾아보도록 하겠습니다.</p>
 
@@ -268,7 +255,7 @@ Document Chunking
   <p>국 문 요 약 시대별 공동주택 설계변천에 따른 하자유형 변화 및 특징에 관한 연구 연세대학교 공학대학원 건 축 공 학 전 공 강 태 준 1960년대부터 시작된 경제개발 5개년 계획에 따라 우리나라는 급속한 경제성장과 함께 도시화 및 산업화로 변화되었으며, 좁은 국토면적과 높은 인구밀도 등으로 인한 주택문제를 해결하기 위해 우리나라의 특성에 적합한 주거양식인 아파트라는 공동주택형식을 도입하게 되었다.</p>
 </blockquote>
 
-<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2Fc227f1c8-9495-45bd-b415-20580b1b802d%2FUntitled.png?table=block&amp;id=3b9f5316-740d-4bfd-8800-4e5ef34ed253&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled"></p>
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2Fc227f1c8-9495-45bd-b415-20580b1b802d%2FUntitled.png?table=block&amp;id=3b9f5316-740d-4bfd-8800-4e5ef34ed253&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled" /></p>
 
 <p>modified_text의 일부분:</p>
 
@@ -280,7 +267,7 @@ Document Chunking
   <p>둘째, 공동주택의 하자는 건축공사의 마감공사부분이 가장 많이 발생하였으며, 주요 유형으로는 불량, 기타, 파손 등이 전체하자의 76.8~79%를 차지하고 있어 이에 따른 관리가 필요한 것으로 분석되었다.</p>
 </blockquote>
 
-<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F5b42074c-1ae0-42a0-82df-2984207465be%2FUntitled.png?table=block&amp;id=32cb48a8-dcf6-44a0-bd38-5f0a7089653c&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled"></p>
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F5b42074c-1ae0-42a0-82df-2984207465be%2FUntitled.png?table=block&amp;id=32cb48a8-dcf6-44a0-bd38-5f0a7089653c&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled" /></p>
 
 <p>아래 코드를 사용하여 문서에서 가장 빈번하게 발생하는 공백을 찾아낼 수 있습니다.</p>
 
@@ -303,10 +290,9 @@ Document Chunking
 
 <p>생성된 결과를 보고 적절한 공백을 선택하여 문서를 구분해야 합니다. 이 방법은 실용적이지만, 원본 문서에 대한 높은 이해도와 많은 지식이 필요할 수 있습니다.</p>
 
-<h1 id="의미-기반-문서-생성을-위한-클러스터링">
-<a class="anchor" href="#%EC%9D%98%EB%AF%B8-%EA%B8%B0%EB%B0%98-%EB%AC%B8%EC%84%9C-%EC%83%9D%EC%84%B1%EC%9D%84-%EC%9C%84%ED%95%9C-%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81" aria-hidden="true"><span class="octicon octicon-link"></span></a>의미 기반 문서 생성을 위한 클러스터링</h1>
+<h1 id="의미-기반-문서-생성을-위한-클러스터링">의미 기반 문서 생성을 위한 클러스터링</h1>
 
-<hr>
+<hr />
 
 <p>이 접근 방법은 의미적으로 유사한 작은 청크를 결합하여 새로운 문서를 생성하는 것입니다.</p>
 
@@ -340,34 +326,23 @@ Document Chunking
 
 <p>의미적으로 더 연관성이 있도록 청크를 생성하겠지만, 내용의 일부가 주변 텍스트와 맥락에서 벗어날 수 있다는 단점이 있습니다. 따라서 이 방법은 각 청크들이 서로 문맥적으로 연관성이 없을 때 (독립적일 때) 잘 작동하게 됩니다.</p>
 
-<h1 id="청크로-나누지-않고-전체-문서-사용하기">
-<a class="anchor" href="#%EC%B2%AD%ED%81%AC%EB%A1%9C-%EB%82%98%EB%88%84%EC%A7%80-%EC%95%8A%EA%B3%A0-%EC%A0%84%EC%B2%B4-%EB%AC%B8%EC%84%9C-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0" aria-hidden="true"><span class="octicon octicon-link"></span></a>청크로 나누지 않고 전체 문서 사용하기</h1>
+<h1 id="청크로-나누지-않고-전체-문서-사용하기">청크로 나누지 않고 전체 문서 사용하기</h1>
 
-<hr>
+<hr />
 
 <p>가장 쉬운 방법이겠지만, 문서가 너무 길어서 텍스트를 임베딩할 때 context window 한계에 걸리는 경우에 단점이 있습니다. 또한 문서에 불필요한 내용들이 채워져 있다면 임베딩의 품질이 저하될 수 있습니다. 이러한 단점들은 여러 페이지의 큰 문서에서 복합적으로 나타납니다.</p>
 
-<h1 id="summary">
-<a class="anchor" href="#summary" aria-hidden="true"><span class="octicon octicon-link"></span></a>Summary</h1>
+<h1 id="summary">Summary</h1>
 
-<hr>
+<hr />
 
-<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F7e7912aa-a0ce-4977-9ebc-34011e67363f%2FUntitled.png?table=block&amp;id=76fa0398-5f86-4261-9b50-d7915c3508d7&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="쉽고 빠르게 익히는 실전 LLM 82 페이지의 표 2-1"></p>
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F7e7912aa-a0ce-4977-9ebc-34011e67363f%2FUntitled.png?table=block&amp;id=76fa0398-5f86-4261-9b50-d7915c3508d7&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="쉽고 빠르게 익히는 실전 LLM 82 페이지의 표 2-1" /></p>
 
 <p>쉽고 빠르게 익히는 실전 LLM 82 페이지의 표 2-1</p>
 
-<h1 id="참고한-코드">
-<a class="anchor" href="#%EC%B0%B8%EA%B3%A0%ED%95%9C-%EC%BD%94%EB%93%9C" aria-hidden="true"><span class="octicon octicon-link"></span></a>참고한 코드</h1>
+<h1 id="참고한-코드">참고한 코드</h1>
 
 <p><a href="https://github.com/sinanuozdemir/quick-start-guide-to-llms/blob/main/notebooks/2_semantic_search.ipynb">https://github.com/sinanuozdemir/quick-start-guide-to-llms/blob/main/notebooks/2_semantic_search.ipynb</a></p>
-
-
-<div class="about">
-<div class="about__divider">*****</div>
-<div class="about__text">
-<br>☕ Pudhina theme by Knhash 🛠️
-</div>
-</div>
 
 
         </div>

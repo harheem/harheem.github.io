@@ -19,19 +19,11 @@
 <link href="https://fonts.googleapis.com/css?family=Quicksand" rel="stylesheet">
     </head>
     <body>
-        <div id="section-nav">
-            <ul id="toc" class="section-nav">
-<li class="toc-entry toc-h1"><a href="#how-to-use-psycopg2-in-an-aws-lambdapython-version-312-docker">
-How to use psycopg2 in an AWS Lambda
-Python version 3.12, Docker
-</a></li>
-<li class="toc-entry toc-h1"><a href="#how-to-use-psycopg2-with-python-version-312-in-an-aws-lambda">How to use psycopg2 with Python version 3.12 in an AWS Lambda</a>
-<ul>
-<li class="toc-entry toc-h2"><a href="#preparing-psycopg2-in-python-39-using-docker">Preparing psycopg2 in Python 3.9 (Using Docker)</a></li>
-<li class="toc-entry toc-h2"><a href="#preparing-psycopg2-in-python-312-using-docker">Preparing psycopg2 in Python 3.12 (Using Docker)</a></li>
-</ul>
-</li>
-</ul>
+        <div class="section-nav">
+            <ul><li>
+<div class="page-title__text">How to use psycopg2 in an AWS Lambda</div>
+<div class="page-title__subtitle">Python version 3.12, Docker</div>
+</li><li><a href="#how-to-use-psycopg2-with-python-version-312-in-an-aws-lambda">How to use psycopg2 with Python version 3.12 in an AWS Lambda</a><ul><li><a href="#preparing-psycopg2-in-python-39-using-docker"><strong>Preparing psycopg2 in Python 3.9 (Using Docker)</strong></a></li><li><a href="#preparing-psycopg2-in-python-312-using-docker"><strong>Preparing psycopg2 in Python 3.12 (Using Docker)</strong></a></li></ul></li></ul>
         </div>
         <div class="wrapper">
             <header class="header">
@@ -61,13 +53,11 @@ Python version 3.12, Docker
 </ul>
 </header>
             <h1 class="page-title">
-<a class="anchor" href="#how-to-use-psycopg2-in-an-aws-lambdapython-version-312-docker" aria-hidden="true"><span class="octicon octicon-link"></span></a>
 <div class="page-title__text">How to use psycopg2 in an AWS Lambda</div>
 <div class="page-title__subtitle">Python version 3.12, Docker</div>
 </h1>
 
-<h1 id="how-to-use-psycopg2-with-python-version-312-in-an-aws-lambda">
-<a class="anchor" href="#how-to-use-psycopg2-with-python-version-312-in-an-aws-lambda" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to use psycopg2 with Python version 3.12 in an AWS Lambda</h1>
+<h1 id="how-to-use-psycopg2-with-python-version-312-in-an-aws-lambda">How to use psycopg2 with Python version 3.12 in an AWS Lambda</h1>
 
 <blockquote>
   <p>This article describes how to use psycopg2 with Python version 3.12 in an AWS Lambda environment. The process involves adjusting and applying methods verified in Python 3.9 to suit the Python 3.12 environment.</p>
@@ -75,17 +65,13 @@ Python version 3.12, Docker
 </blockquote>
 
 <ul>
-  <li>
-<strong><code class="language-plaintext highlighter-rouge">psycopg2</code></strong> is a Python library for connecting to PostgreSQL databases. PostgreSQL is an open-source relational database system widely used in various projects and applications. psycopg2 is a tool that facilitates interaction with PostgreSQL.</li>
-  <li>
-<strong><code class="language-plaintext highlighter-rouge">AWS Lambda</code></strong> is a service that allows code execution without a server, charging only for the computing resources used. This service offers several advantages, including automatic scalability and event-based execution.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">psycopg2</code></strong> is a Python library for connecting to PostgreSQL databases. PostgreSQL is an open-source relational database system widely used in various projects and applications. psycopg2 is a tool that facilitates interaction with PostgreSQL.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">AWS Lambda</code></strong> is a service that allows code execution without a server, charging only for the computing resources used. This service offers several advantages, including automatic scalability and event-based execution.</li>
 </ul>
 
-<h2 id="preparing-psycopg2-in-python-39-using-docker">
-<a class="anchor" href="#preparing-psycopg2-in-python-39-using-docker" aria-hidden="true"><span class="octicon octicon-link"></span></a><strong>Preparing psycopg2 in Python 3.9 (Using Docker)</strong>
-</h2>
+<h2 id="preparing-psycopg2-in-python-39-using-docker"><strong>Preparing psycopg2 in Python 3.9 (Using Docker)</strong></h2>
 
-<hr>
+<hr />
 
 <p><a href="https://github.com/aws/aws-cdk/discussions/28339">Unable to import module ‘testdb’: No module named ‘psycopg2._psycopg’ · aws aws-cdk · Discussion #28339</a></p>
 
@@ -108,11 +94,9 @@ Python version 3.12, Docker
 
 <p>You can learn more about registering a Lambda layer in <a href="https://docs.aws.amazon.com/ko_kr/lambda/latest/dg/adding-layers.html">this article</a>.</p>
 
-<h2 id="preparing-psycopg2-in-python-312-using-docker">
-<a class="anchor" href="#preparing-psycopg2-in-python-312-using-docker" aria-hidden="true"><span class="octicon octicon-link"></span></a><strong>Preparing psycopg2 in Python 3.12 (Using Docker)</strong>
-</h2>
+<h2 id="preparing-psycopg2-in-python-312-using-docker"><strong>Preparing psycopg2 in Python 3.12 (Using Docker)</strong></h2>
 
-<hr>
+<hr />
 
 <p>The same process was then applied in the Python 3.12 environment using the following commands.</p>
 
@@ -135,9 +119,9 @@ Python version 3.12, Docker
 
 <p>After registering it as a Lambda layer using the same method, I executed the code.</p>
 
-<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F6a14bf8d-a450-46db-a868-0e028a24fd54%2FUntitled.png?table=block&amp;id=d213fc2c-e291-4fa4-8820-38164aec72eb&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled"></p>
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F6a14bf8d-a450-46db-a868-0e028a24fd54%2FUntitled.png?table=block&amp;id=d213fc2c-e291-4fa4-8820-38164aec72eb&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled" /></p>
 
-<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2Fd92ffa5e-f133-4f3a-978b-15d654b84559%2FUntitled.png?table=block&amp;id=92a8d8b9-45dc-444e-9b1d-928cbafc7eaa&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled"></p>
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2Fd92ffa5e-f133-4f3a-978b-15d654b84559%2FUntitled.png?table=block&amp;id=92a8d8b9-45dc-444e-9b1d-928cbafc7eaa&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled" /></p>
 
 <p>As a result, the psycopg2 version was correctly displayed in the Python 3.12 environment. The image used was <a href="http://public.ecr.aws/sam/build-python3.12:latest">public.ecr.aws/sam/build-python3.12:latest</a>, and the Lambda function was set up for Python 3.12 arm64. If a different architecture is needed, you can find the desired image at <a href="https://gallery.ecr.aws/sam/build-python3.12">this link</a>.</p>
 
@@ -145,14 +129,6 @@ Python version 3.12, Docker
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>arn:aws:lambda:ap-northeast-2:550316102722:layer:psycopg2-binary-arm64-312:1
 </code></pre></div></div>
-
-
-<div class="about">
-<div class="about__divider">*****</div>
-<div class="about__text">
-<br>☕ Pudhina theme by Knhash 🛠️
-</div>
-</div>
 
 
         </div>

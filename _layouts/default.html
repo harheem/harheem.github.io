@@ -5,12 +5,12 @@
         {% include externals/styling.html %}
     </head>
     <body>
-        <div id="section-nav">
-            {{ content | toc_only }}
+        <div class="section-nav">
+            {% include toc.html html=content %}
         </div>
         <div class="wrapper">
             {% include header.html %}
-            {{ content | inject_anchors }}
+            {{ content }}
         </div>
         {% include externals/scripting.html %}
     </body>
