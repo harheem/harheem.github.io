@@ -10,11 +10,11 @@ author: "Harheem Kim"
 # Vector Database
 [14. Can you calculate a vector database by hand? - Tom Yeh](https://www.linkedin.com/posts/tom-yeh_vectordatabase-rag-deeplearning-activity-7158816842730336257-BaSm/?utm_source=share&utm_medium=member_desktop)
 
-![image](https://github.com/harheem/harheem.github.io/blob/main/assets/img/AI-by-hand/Can%20You%20Calculate%20This%20By%20Hand?-40.jpg)
+![image](../../../../assets/img/AI-by-hand/40.jpg)
 
-![image](https://github.com/harheem/harheem.github.io/blob/main/assets/img/AI-by-hand/Can%20You%20Calculate%20This%20By%20Hand?-41.jpg)
+![image](../../../../assets/img/AI-by-hand/41.jpg)
 
-![image](https://github.com/harheem/harheem.github.io/blob/main/assets/img/AI-by-hand/Can%20You%20Calculate%20This%20By%20Hand?-42.jpg)
+![image](../../../../assets/img/AI-by-hand/42.jpg)
 
 ## CLS Pooling
 > CLS Pooling uses the final hidden state of a "CLS" token added at the beginning of the sentence to obtain a vector that represents the sentence.
