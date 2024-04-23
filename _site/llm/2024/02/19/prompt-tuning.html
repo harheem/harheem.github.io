@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title> Prompt Tuning — The Power of Scale for Parameter-Efficient Prompt Tuning  | harheem</title>
+<meta name="description" content="A simple, minimal Jekyll theme for a personal web page and blog, focusing on white space and readability
+">
+<meta name="keywords" content="">
+<link rel="canonical" href="/llm/2024/02/19/prompt-tuning.html">
+        <link rel="icon" type="image/jpeg" href="/assets/img/pudhina.jpg"/>
+<link rel="stylesheet" href="/assets/vendor/normalize-css/normalize.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<link rel="stylesheet" href="/assets/vendor/highlight/styles/agate.css">
+
+<link rel="stylesheet" href="/assets/vendor/font-awesome/css/font-awesome.css">
+<link href="https://fonts.googleapis.com/css?family=Quicksand" rel="stylesheet">
+    </head>
+    <body>
+        <div id="section-nav">
+            <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#prompt-tuningthe-power-of-scale-for-parameter-efficient-prompt-tuning">
+Prompt Tuning
+The Power of Scale for Parameter-Efficient Prompt Tuning
+</a></li>
+<li class="toc-entry toc-h1"><a href="#prompt-tuning">Prompt Tuning</a></li>
+<li class="toc-entry toc-h1"><a href="#프롬프트-튜닝이란">프롬프트 튜닝이란?</a></li>
+<li class="toc-entry toc-h1"><a href="#작동-원리">작동 원리</a></li>
+<li class="toc-entry toc-h1"><a href="#간단한-코드">간단한 코드</a></li>
+<li class="toc-entry toc-h1"><a href="#peft-transformers-라이브러리를-활용한-예시">peft, transformers 라이브러리를 활용한 예시</a></li>
+<li class="toc-entry toc-h1"><a href="#마무리">마무리</a></li>
+<li class="toc-entry toc-h1"><a href="#reference">Reference</a></li>
+</ul>
+        </div>
+        <div class="wrapper">
+            <header class="header">
+<div class="navigation">
+<a href="/" class="logo">harheem</a>
+<ul class="menu">
+<li class="menu__entry"><a href="/resume">Resume</a></li>
+<li class="menu__entry"><a href="/blog">Blog</a></li>
+</ul>
+</div>
+<ul class="social-links">
+
+<a href="mailto:shhr.kre@gmail.com" class="social-links__entry" target="_blank">
+<i class="fa fa-envelope-square"></i>
+</a>
+
+
+<a href="https://github.com/harheem" class="social-links__entry" target="_blank">
+<i class="fa fa-github"></i>
+</a>
+
+
+<a href="https://in.linkedin.com/in/harheemk" class="social-links__entry" target="_blank">
+<i class="fa fa-linkedin"></i>
+</a>
+
+</ul>
+</header>
+            <h1 class="page-title">
+<a class="anchor" href="#prompt-tuningthe-power-of-scale-for-parameter-efficient-prompt-tuning" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+<div class="page-title__text">Prompt Tuning</div>
+<div class="page-title__subtitle">The Power of Scale for Parameter-Efficient Prompt Tuning</div>
+</h1>
+
+<h1 id="prompt-tuning">
+<a class="anchor" href="#prompt-tuning" aria-hidden="true"><span class="octicon octicon-link"></span></a>Prompt Tuning</h1>
+
+<blockquote>
+  <p><strong>PEFT(Parameter-Efficient Fine-Tuning)는 적은 수의 파라미터를 학습하는것만으로 모델 전체를 파인튜닝하는 것과 유사한 효과를 누릴 수 있도록 해줍니다. PEFT 방법 중 하나인 Prompt Tuning에 대해서 알아봅시다.</strong></p>
+
+</blockquote>
+
+<p><a href="https://arxiv.org/pdf/2104.08691.pdf">https://arxiv.org/pdf/2104.08691.pdf</a></p>
+
+<h1 id="프롬프트-튜닝이란">
+<a class="anchor" href="#%ED%94%84%EB%A1%AC%ED%94%84%ED%8A%B8-%ED%8A%9C%EB%8B%9D%EC%9D%B4%EB%9E%80" aria-hidden="true"><span class="octicon octicon-link"></span></a><strong>프롬프트 튜닝이란?</strong>
+</h1>
+
+<p>언어 모델을 특정 작업에 맞게 조정하기 위해 사용되는 기술입니다. 기존의 방식은 모델을 특정 작업에 맞게 전체적으로 조정해야 했지만, 프롬프트 튜닝은 모델의 핵심 부분을 그대로 유지하면서 작업 특화 부분만 조정합니다. 이는 모델의 ‘냉동’(frozen) 상태를 유지하면서도 필요한 부분에만 초점을 맞추어 효율성을 높이는 방법입니다.</p>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F06fcee26-22da-429a-9e1b-46c98535ed1d%2FUntitled.png?table=block&amp;id=1be7483c-133f-42ec-b874-da2bdfce41bb&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="*Prompt tuning retains the strong task performance of model tuning, while keeping the pre-trained model frozen, enabling efficient multitask serving.*"></p>
+
+<p><em>Prompt tuning retains the strong task performance of model tuning, while keeping the pre-trained model frozen, enabling efficient multitask serving.</em></p>
+
+<h1 id="작동-원리">
+<a class="anchor" href="#%EC%9E%91%EB%8F%99-%EC%9B%90%EB%A6%AC" aria-hidden="true"><span class="octicon octicon-link"></span></a><strong>작동 원리</strong>
+</h1>
+
+<p>소프트 프롬프트는 학습 가능한 ‘벡터’로 이루어져 있습니다. 이 벡터들은 입력 텍스트와 결합되어 모델의 입력으로 사용됩니다. 이 벡터들은 기존 어휘에 속하지 않는 ‘가상의 토큰(virtual tokens)’으로서 작동하며, 모델의 기존 파라미터를 변경하지 않고도 특정 작업에 대한 모델의 반응을 조정할 수 있습니다. 모델은 이 입력을 기반으로 예측을 수행하고, 이 과정에서 오차를 계산하여 소프트 프롬프트를 최적화합니다. 이 방법을 통해, 다양한 작업에 대한 지식을 효과적으로 흡수하고 적용할 수 있게 됩니다.</p>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F44052b28-0850-4572-a0dc-2d28dbaa6dcd%2FUntitled.png?table=block&amp;id=8de0b385-4ab8-4411-a713-0b03e716c3a0&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled"></p>
+
+<p>먼저, 소프트 프롬프트를 고정 길이(e.g., 20 tokens long)의 벡터 시퀀스로 초기화합니다. 이 벡터들은 모델의 입력 텍스트 앞에 배치됩니다.</p>
+
+<p>모델이 입력을 처리할 때, 이 소프트 프롬프트 벡터들도 함께 처리됩니다. 모델이 예측을 수행하면, 예측 결과와 실제 타겟 간의 오차를 계산하여 이 오차를 사용해 소프트 프롬프트 벡터를 업데이트합니다.</p>
+
+<h1 id="간단한-코드">
+<a class="anchor" href="#%EA%B0%84%EB%8B%A8%ED%95%9C-%EC%BD%94%EB%93%9C" aria-hidden="true"><span class="octicon octicon-link"></span></a>간단한 코드</h1>
+
+<hr>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">import</span> <span class="n">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
+
+<span class="k">class</span> <span class="nc">SoftEmbedding</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> 
+                <span class="n">wte</span><span class="p">:</span> <span class="n">nn</span><span class="p">.</span><span class="n">Embedding</span><span class="p">,</span>
+                <span class="n">n_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> 
+                <span class="n">random_range</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+                <span class="n">initialize_from_vocab</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">appends learned embedding to 
+
+        Args:
+            wte (nn.Embedding): original transformer word embedding
+            n_tokens (int, optional): number of tokens for task. Defaults to 10.
+            random_range (float, optional): range to init embedding (if not initialize from vocab). Defaults to 0.5.
+            initialize_from_vocab (bool, optional): initalizes from default vocab. Defaults to True.
+        </span><span class="sh">"""</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">SoftEmbedding</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">wte</span> <span class="o">=</span> <span class="n">wte</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">n_tokens</span> <span class="o">=</span> <span class="n">n_tokens</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">learned_embedding</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">parameter</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">initialize_embedding</span><span class="p">(</span><span class="n">wte</span><span class="p">,</span>
+                                                                               <span class="n">n_tokens</span><span class="p">,</span> 
+                                                                               <span class="n">random_range</span><span class="p">,</span> 
+                                                                               <span class="n">initialize_from_vocab</span><span class="p">))</span>
+            
+    <span class="k">def</span> <span class="nf">initialize_embedding</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> 
+                             <span class="n">wte</span><span class="p">:</span> <span class="n">nn</span><span class="p">.</span><span class="n">Embedding</span><span class="p">,</span>
+                             <span class="n">n_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> 
+                             <span class="n">random_range</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> 
+                             <span class="n">initialize_from_vocab</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">initializes learned embedding
+
+        Args:
+            same as __init__
+
+        Returns:
+            torch.float: initialized using original schemes
+        </span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">initialize_from_vocab</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">wte</span><span class="p">.</span><span class="n">weight</span><span class="p">[:</span><span class="n">n_tokens</span><span class="p">].</span><span class="nf">clone</span><span class="p">().</span><span class="nf">detach</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="nc">FloatTensor</span><span class="p">(</span><span class="n">n_tokens</span><span class="p">,</span> <span class="n">wte</span><span class="p">.</span><span class="n">weight</span><span class="p">.</span><span class="nf">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)).</span><span class="nf">uniform_</span><span class="p">(</span><span class="o">-</span><span class="n">random_range</span><span class="p">,</span> <span class="n">random_range</span><span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">run forward pass
+
+        Args:
+            tokens (torch.long): input tokens before encoding
+
+        Returns:
+            torch.float: encoding of text concatenated with learned task specifc embedding
+        </span><span class="sh">"""</span>
+
+				<span class="c1"># Changes: Apply word embeddings to the entire set of input tokens without slicing
+</span>        <span class="n">input_embedding</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">wte</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="n">learned_embedding</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">learned_embedding</span><span class="p">.</span><span class="nf">repeat</span><span class="p">(</span><span class="n">input_embedding</span><span class="p">.</span><span class="nf">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cat</span><span class="p">([</span><span class="n">learned_embedding</span><span class="p">,</span> <span class="n">input_embedding</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>출처: <a href="https://github.com/kipgparker/soft-prompt-tuning/blob/main/soft_embedding.py">https://github.com/kipgparker/soft-prompt-tuning</a></p>
+
+<p>이 코드는 PyTorch를 사용하여 ‘SoftEmbedding’이라는 신경망 모듈을 정의합니다.</p>
+
+<p>이 모듈의 주요 목적은 기존 트랜스포머 모델의 워드 임베딩(word embedding)에 추가적인 학습 가능한 임베딩을 결합하는 것입니다. 이를 통해 특정 작업에 대한 모델의 성능을 향상시킬 수 있습니다.</p>
+
+<p>출처 코드에서는 <code class="language-plaintext highlighter-rouge">input_embedding = self.wte(tokens[:, self.n_tokens:])</code> 로 소프트 프롬프트 토큰의 길이만큼 원본 임베딩을 잘라서 결합하였지만, 저는 원본 임베딩에 추가된 임베딩을 결합해서 사용하기 위해  다음과 같이 코드를 변경하였습니다: <code class="language-plaintext highlighter-rouge">input_embedding = self.wte(tokens)</code></p>
+
+<p>코드를 자세히 살펴보겠습니다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">**SoftEmbedding**</code></p>
+
+<p>이 클래스는 <code class="language-plaintext highlighter-rouge">nn.Module</code>을 상속받아 PyTorch의 신경망 모듈로 정의됩니다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">**__init__**</code></p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">wte (nn.Embedding)</code>: 기존 트랜스포머 모델의 워드 임베딩을 나타냅니다.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">n_tokens (int)</code>: 학습 가능한 추가 토큰의 수입니다. 이 값이 10일 때, 10개의 추가 임베딩 토큰이 생성됩니다.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">random_range (float)</code>: 임베딩을 초기화할 때 사용되는 범위입니다. 이 값이 0.5일 때, 각 임베딩 값은 -0.5 ~ 0.5 사이의 범위에서 무작위로 초기화됩니다.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">initialize_from_vocab (bool)</code>: 기존 어휘에서 임베딩을 초기화할지 여부를 결정합니다. 이 값은 아래 <code class="language-plaintext highlighter-rouge">initialize_embedding</code> 에서 어떻게 사용되는지 알 수 있습니다.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">learned_embedding</code>: 특정 작업에 특화된 정보를 포함할 수 있도록 설계된 새로운 임베딩입니다. 추가적인 학습 가능한 임베딩을 정의하며, 초기화 방법은 <code class="language-plaintext highlighter-rouge">initialize_embedding</code> 메서드에 의해 결정됩니다.</li>
+</ul>
+
+<p><strong><code class="language-plaintext highlighter-rouge">initialize_embedding</code></strong></p>
+
+<ul>
+  <li>이 메서드는 추가 임베딩을 초기화하는 데 사용됩니다.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">initialize_from_vocab</code>가 <code class="language-plaintext highlighter-rouge">True</code>이면 기존의 워드 임베딩(wte)에서 처음 <code class="language-plaintext highlighter-rouge">n_tokens</code>만큼을 복사하여 사용합니다. 이 방법은 기존 어휘에 기반한 임베딩을 사용하기 때문에, 모델이 이미 학습한 언어적 특성을 유지하도록 합니다.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">False</code>인 경우, 지정된 <code class="language-plaintext highlighter-rouge">random_range</code>를 사용하여 임베딩을 무작위로 초기화합니다. 이 방법은 모델이 이전에 보지 못한 새로운 종류의 데이터나 작업에 대응해야 할 때 유용합니다.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">**forward**</code></p>
+
+<ul>
+  <li>모델이 입력 데이터를 어떻게 처리하는지 정의합니다. 이 메서드는 입력 토큰을 받아 추가적인 학습된 임베딩과 함께 원래의 워드 임베딩을 결합합니다.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">tokens</code>: 입력 데이터를 나타냅니다. 이는 모델이 처리할 원시 텍스트를 토큰화한 것입니다.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">learned_embedding</code>은 모든 입력에 대해 반복되며, 기존 입력 임베딩과 연결됩니다.</li>
+  <li>최종적으로, 학습된 임베딩과 입력 임베딩이 연결되어 반환됩니다.</li>
+</ul>
+
+<h1 id="peft-transformers-라이브러리를-활용한-예시">
+<a class="anchor" href="#peft-transformers-%EB%9D%BC%EC%9D%B4%EB%B8%8C%EB%9F%AC%EB%A6%AC%EB%A5%BC-%ED%99%9C%EC%9A%A9%ED%95%9C-%EC%98%88%EC%8B%9C" aria-hidden="true"><span class="octicon octicon-link"></span></a>peft, transformers 라이브러리를 활용한 예시</h1>
+
+<hr>
+
+<p>시작하기 전에 <strong><code class="language-plaintext highlighter-rouge">peft</code></strong>, <strong><code class="language-plaintext highlighter-rouge">transformers</code></strong>, <strong><code class="language-plaintext highlighter-rouge">datasets</code>, <code class="language-plaintext highlighter-rouge">torch</code></strong> 등 필요한 라이브러리를 설치합니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">q</span> <span class="n">peft</span> <span class="n">transformers</span> <span class="n">datasets</span> <span class="n">torch</span>
+</code></pre></div></div>
+
+<p>사용할 모델과 토크나이저를 정의합니다. 이 예시에서는 <strong><code class="language-plaintext highlighter-rouge">bigscience/bloomz-560m</code></strong>을 모델과 토크나이저로 사용하였습니다. <strong><code class="language-plaintext highlighter-rouge">PromptTuningConfig</code></strong>를 정의하여 작업 유형, 가상 토큰의 수, 초기화 텍스트, 토크나이저 이름 또는 경로 등의 세부 정보를 지정합니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoModelForCausalLM</span>
+<span class="kn">from</span> <span class="n">peft</span> <span class="kn">import</span> <span class="n">get_peft_config</span><span class="p">,</span> <span class="n">get_peft_model</span><span class="p">,</span> <span class="n">PromptTuningInit</span><span class="p">,</span> <span class="n">PromptTuningConfig</span><span class="p">,</span> <span class="n">TaskType</span><span class="p">,</span> <span class="n">PeftType</span>
+<span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">from</span> <span class="n">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+<span class="kn">import</span> <span class="n">os</span>
+<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span>
+<span class="kn">from</span> <span class="n">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">default_data_collator</span><span class="p">,</span> <span class="n">get_linear_schedule_with_warmup</span>
+<span class="kn">from</span> <span class="n">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="n">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">device</span> <span class="o">=</span> <span class="sh">"</span><span class="s">cuda</span><span class="sh">"</span>
+<span class="n">model_name_or_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">bigscience/bloomz-560m</span><span class="sh">"</span>
+<span class="n">tokenizer_name_or_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">bigscience/bloomz-560m</span><span class="sh">"</span>
+<span class="n">peft_config</span> <span class="o">=</span> <span class="nc">PromptTuningConfig</span><span class="p">(</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="n">TaskType</span><span class="p">.</span><span class="n">CAUSAL_LM</span><span class="p">,</span>
+    <span class="n">prompt_tuning_init</span><span class="o">=</span><span class="n">PromptTuningInit</span><span class="p">.</span><span class="n">TEXT</span><span class="p">,</span>
+    <span class="n">num_virtual_tokens</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">prompt_tuning_init_text</span><span class="o">=</span><span class="sh">"</span><span class="s">Classify if the tweet is a complaint or not:</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">tokenizer_name_or_path</span><span class="o">=</span><span class="n">model_name_or_path</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="sh">"</span><span class="s">twitter_complaints</span><span class="sh">"</span>
+<span class="n">checkpoint_name</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">model_name_or_path</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">peft_config</span><span class="p">.</span><span class="n">peft_type</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">peft_config</span><span class="p">.</span><span class="n">task_type</span><span class="si">}</span><span class="s">_v1.pt</span><span class="sh">"</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">_</span><span class="sh">"</span>
+<span class="p">)</span>
+<span class="n">text_column</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Tweet text</span><span class="sh">"</span>
+<span class="n">label_column</span> <span class="o">=</span> <span class="sh">"</span><span class="s">text_label</span><span class="sh">"</span>
+<span class="n">max_length</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">lr</span> <span class="o">=</span> <span class="mf">3e-2</span>
+<span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">8</span>
+</code></pre></div></div>
+
+<p>이 예제에서는 <strong><code class="language-plaintext highlighter-rouge">ought/raft</code></strong>의 <strong><code class="language-plaintext highlighter-rouge">twitter_complaints</code></strong>라는 데이터셋을 사용합니다. 이 데이터셋은 트위터의 트윗들을 포함하고 있으며, 감정 분석이나 텍스트 분류를 위한 연구에 주로 사용됩니다. 데이터셋을 전처리하는 코드는 생략합니다. 자세한 내용은 참고 코드를 확인해주세요.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="sh">"</span><span class="s">ought/raft</span><span class="sh">"</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+
+<span class="n">classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sh">"</span><span class="s">_</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s"> </span><span class="sh">"</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="sh">"</span><span class="s">train</span><span class="sh">"</span><span class="p">].</span><span class="n">features</span><span class="p">[</span><span class="sh">"</span><span class="s">Label</span><span class="sh">"</span><span class="p">].</span><span class="n">names</span><span class="p">]</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">text_label</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="n">classes</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">x</span><span class="p">[</span><span class="sh">"</span><span class="s">Label</span><span class="sh">"</span><span class="p">]]},</span>
+    <span class="n">batched</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">num_proc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">dataset</span><span class="p">[</span><span class="sh">"</span><span class="s">train</span><span class="sh">"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>모델을 초기화합니다. <code class="language-plaintext highlighter-rouge">print_trainable_parameters()</code>로 훈련 가능한 파라미터들을 확인할 수 있습니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># creating model
+</span><span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_name_or_path</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="nf">get_peft_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">peft_config</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="nf">print_trainable_parameters</span><span class="p">()</span>
+<span class="n">model</span>
+</code></pre></div></div>
+
+<p>모델의 파라미터를 최적화하기 위해 AdamW 옵티마이저를 사용합니다. 학습률(lr)로 학습 과정에서 얼마나 큰 단계로 가중치를 업데이트할지 결정할 수 있습니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># optimizer and lr scheduler
+</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="nc">AdamW</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+<span class="n">lr_scheduler</span> <span class="o">=</span> <span class="nf">get_linear_schedule_with_warmup</span><span class="p">(</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+    <span class="n">num_warmup_steps</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">num_training_steps</span><span class="o">=</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">)</span> <span class="o">*</span> <span class="n">num_epochs</span><span class="p">),</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>전체 데이터셋에 대해 학습을 수행합니다. 훈련된 모델의 성능을 확인하기 위해 loss와 perplexity를 확인합니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># training and evaluation
+</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+    <span class="n">total_loss</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="nf">tqdm</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">)):</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">.</span><span class="nf">items</span><span class="p">()}</span>
+        <span class="c1">#         print(batch)
+</span>        <span class="c1">#         print(batch["input_ids"].shape)
+</span>        <span class="n">outputs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="o">**</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">.</span><span class="n">loss</span>
+        <span class="n">total_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">float</span><span class="p">()</span>
+        <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+        <span class="n">lr_scheduler</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+
+    <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+    <span class="n">eval_loss</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">eval_preds</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="nf">tqdm</span><span class="p">(</span><span class="n">eval_dataloader</span><span class="p">)):</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">.</span><span class="nf">items</span><span class="p">()}</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="o">**</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">.</span><span class="n">loss</span>
+        <span class="n">eval_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">float</span><span class="p">()</span>
+        <span class="n">eval_preds</span><span class="p">.</span><span class="nf">extend</span><span class="p">(</span>
+            <span class="n">tokenizer</span><span class="p">.</span><span class="nf">batch_decode</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">argmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">.</span><span class="n">logits</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">).</span><span class="nf">detach</span><span class="p">().</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">(),</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">eval_epoch_loss</span> <span class="o">=</span> <span class="n">eval_loss</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">eval_dataloader</span><span class="p">)</span>
+    <span class="n">eval_ppl</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">eval_epoch_loss</span><span class="p">)</span>
+    <span class="n">train_epoch_loss</span> <span class="o">=</span> <span class="n">total_loss</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">)</span>
+    <span class="n">train_ppl</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">train_epoch_loss</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">epoch</span><span class="o">=</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">train_ppl</span><span class="o">=</span><span class="si">}</span><span class="s"> </span><span class="si">{</span><span class="n">train_epoch_loss</span><span class="o">=</span><span class="si">}</span><span class="s"> </span><span class="si">{</span><span class="n">eval_ppl</span><span class="o">=</span><span class="si">}</span><span class="s"> </span><span class="si">{</span><span class="n">eval_epoch_loss</span><span class="o">=</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>참고 코드: <a href="https://github.com/huggingface/peft/blob/main/examples/causal_language_modeling/peft_prompt_tuning_clm.ipynb">https://github.com/huggingface/peft/blob/main/examples/causal_language_modeling/peft_prompt_tuning_clm.ipynb</a></p>
+
+<p>문서: <a href="https://huggingface.co/docs/peft/v0.8.2/en/package_reference/prompt_tuning#peft.PromptTuningConfig">https://huggingface.co/docs/peft/v0.8.2/en/package_reference/prompt_tuning#peft.PromptTuningConfig</a></p>
+
+<h1 id="마무리">
+<a class="anchor" href="#%EB%A7%88%EB%AC%B4%EB%A6%AC" aria-hidden="true"><span class="octicon octicon-link"></span></a>마무리</h1>
+
+<hr>
+
+<p>프롬프트 튜닝의 가장 큰 장점은 효율성입니다. 전체 모델을 다시 학습하지 않고도, 매우 적은 양의 파라미터만으로도 특정 작업에 대해 높은 성능을 낼 수 있습니다. 또한, 다양한 작업에 하나의 모델을 사용하여 리소스 활용도가 높아집니다. 특히 대규모 모델에서 이 방법의 효과가 크게 나타납니다.</p>
+
+<p>구글 연구팀의 블로그에 따르면, 프롬프트 튜닝을 적용한 모델은 특정 도메인의 데이터로 학습한 후, 관련된 다른 도메인의 작업에 대해 ‘제로-샷’ 평가를 수행했을 때 더 높은 정확도를 보였습니다. 예를 들어, ‘Quora Question Pairs’ 작업으로 학습된 모델이 ‘MRPC’(뉴스 기사의 문장이 서로 다른 방식으로 표현되었는지 판별하는 작업) 작업에서도 높은 성능을 보였습니다.</p>
+
+<p>이러한 결과는 소프트 프롬프트 튜닝이 모델의 일반화 능력을 향상시키고, 특정 도메인에 과도하게 최적화되지 않도록 하는데 도움을 준다는 것을 시사합니다. 따라서, 언어 모델을 다양한 작업에 적용하고자 할 때 프롬프트 튜닝은 매우 유용한 도구가 될 수 있습니다.</p>
+
+<p>더 자세한 정보와 연구 결과는 <a href="https://blog.research.google/2022/02/guiding-frozen-language-models-with.html">Guiding Frozen Language Models with Learned Soft Prompts</a>를 참고하세요.</p>
+
+<h1 id="reference">
+<a class="anchor" href="#reference" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reference</h1>
+
+<p><a href="https://arxiv.org/pdf/2104.08691.pdf">https://arxiv.org/pdf/2104.08691.pdf</a></p>
+
+<p><a href="https://4n3mone.tistory.com/7">https://4n3mone.tistory.com/7</a></p>
+
+
+<div class="about">
+<div class="about__divider">*****</div>
+<div class="about__text">
+<br>☕ Pudhina theme by Knhash 🛠️
+</div>
+</div>
+
+
+        </div>
+        <script src="/assets/vendor/highlight/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>

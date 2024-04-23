@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title> Document Chunking — 쉽고 빠르게 익히는 실전 LLM - 문서 청킹  | harheem</title>
+<meta name="description" content="A simple, minimal Jekyll theme for a personal web page and blog, focusing on white space and readability
+">
+<meta name="keywords" content="">
+<link rel="canonical" href="/llm/2024/02/14/chunking.html">
+        <link rel="icon" type="image/jpeg" href="/assets/img/pudhina.jpg"/>
+<link rel="stylesheet" href="/assets/vendor/normalize-css/normalize.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<link rel="stylesheet" href="/assets/vendor/highlight/styles/agate.css">
+
+<link rel="stylesheet" href="/assets/vendor/font-awesome/css/font-awesome.css">
+<link href="https://fonts.googleapis.com/css?family=Quicksand" rel="stylesheet">
+    </head>
+    <body>
+        <div id="section-nav">
+            <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#document-chunking%EC%89%BD%EA%B3%A0-%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EC%9D%B5%ED%9E%88%EB%8A%94-%EC%8B%A4%EC%A0%84-llm---%EB%AC%B8%EC%84%9C-%EC%B2%AD%ED%82%B9">
+Document Chunking
+쉽고 빠르게 익히는 실전 LLM - 문서 청킹
+</a></li>
+<li class="toc-entry toc-h1"><a href="#문서-청킹-document-chunking">문서 청킹 (Document Chunking)</a></li>
+<li class="toc-entry toc-h1"><a href="#최대-토큰-범위-분할-max-token-window-chunking">최대 토큰 범위 분할 (Max Token Window Chunking)</a></li>
+<li class="toc-entry toc-h1"><a href="#맞춤형-구분-기호-찾기">맞춤형 구분 기호 찾기</a></li>
+<li class="toc-entry toc-h1"><a href="#의미-기반-문서-생성을-위한-클러스터링">의미 기반 문서 생성을 위한 클러스터링</a></li>
+<li class="toc-entry toc-h1"><a href="#청크로-나누지-않고-전체-문서-사용하기">청크로 나누지 않고 전체 문서 사용하기</a></li>
+<li class="toc-entry toc-h1"><a href="#summary">Summary</a></li>
+<li class="toc-entry toc-h1"><a href="#참고한-코드">참고한 코드</a></li>
+</ul>
+        </div>
+        <div class="wrapper">
+            <header class="header">
+<div class="navigation">
+<a href="/" class="logo">harheem</a>
+<ul class="menu">
+<li class="menu__entry"><a href="/resume">Resume</a></li>
+<li class="menu__entry"><a href="/blog">Blog</a></li>
+</ul>
+</div>
+<ul class="social-links">
+
+<a href="mailto:shhr.kre@gmail.com" class="social-links__entry" target="_blank">
+<i class="fa fa-envelope-square"></i>
+</a>
+
+
+<a href="https://github.com/harheem" class="social-links__entry" target="_blank">
+<i class="fa fa-github"></i>
+</a>
+
+
+<a href="https://in.linkedin.com/in/harheemk" class="social-links__entry" target="_blank">
+<i class="fa fa-linkedin"></i>
+</a>
+
+</ul>
+</header>
+            <h1 class="page-title">
+<a class="anchor" href="#document-chunking%EC%89%BD%EA%B3%A0-%EB%B9%A0%EB%A5%B4%EA%B2%8C-%EC%9D%B5%ED%9E%88%EB%8A%94-%EC%8B%A4%EC%A0%84-llm---%EB%AC%B8%EC%84%9C-%EC%B2%AD%ED%82%B9" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+<div class="page-title__text">Document Chunking</div>
+<div class="page-title__subtitle">쉽고 빠르게 익히는 실전 LLM - 문서 청킹</div>
+</h1>
+
+<h1 id="문서-청킹-document-chunking">
+<a class="anchor" href="#%EB%AC%B8%EC%84%9C-%EC%B2%AD%ED%82%B9-document-chunking" aria-hidden="true"><span class="octicon octicon-link"></span></a>문서 청킹 (Document Chunking)</h1>
+
+<p>큰 문서를 다룰 때, 전체 문서를 단일 벡터로 임베딩하는 것은 실용적이지 않을때가 많습니다. 이 문제를 해결할 수 있는 방법 중 하나인 문서 청킹에 대해 이야기해보고자 합니다.</p>
+
+<p>문서 청킹은 큰 문서를 임베딩하기 위해 더 작고 관리 가능한 청크로 나누는 것을 의미합니다.</p>
+
+<p>(청킹은 일반적으로 정보를 의미 있는 묶음으로 분류하는 것을 의미합니다. 청크는 의미에 따라 묶여진 정보의 덩어리로 이해할 수 있습니다.)</p>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2Fc3a4dc1c-8e9b-4d33-b0d6-c024fe71a7f1%2FUntitled.png?table=block&amp;id=0968fda9-4668-43c8-9da4-3e2a21316153&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="[https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023](https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023)"></p>
+
+<p><a href="https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023">https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023</a></p>
+
+<h1 id="최대-토큰-범위-분할-max-token-window-chunking">
+<a class="anchor" href="#%EC%B5%9C%EB%8C%80-%ED%86%A0%ED%81%B0-%EB%B2%94%EC%9C%84-%EB%B6%84%ED%95%A0-max-token-window-chunking" aria-hidden="true"><span class="octicon octicon-link"></span></a>최대 토큰 범위 분할 (Max Token Window Chunking)</h1>
+
+<hr>
+
+<p>주어진 최대 크기의 청크로 문서를 나누는 것을 포함합니다. 예를 들어, 최대 토큰 수를 256으로 설정한다면, 256 토큰보다는 작은 청크로 분리가 될 것입니다. 비슷한 크기의 청크를 생성하는 것은 시스템을 일관성 있게 만드는 데 도움이 됩니다.</p>
+
+<p>이 방법은 중요한 텍스트 일부를 잘라낼 수 있어 문맥이 분리가 될 수 있습니다. 이 문제를 보완하기 위해 토큰이 청크 사이에 공유되도록 지정된 값만큼 겹치게 하도록 할 수 있습니다. 이렇게 하면 중복된 토큰이 생기지만, 더 높은 정확도를 기대할 수 있습니다. 이는 아래 코드에서 overlapping_factor에 해당하는 부분입니다.</p>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F8cc13022-4b14-4a7f-8d7b-45b47c4090e5%2FUntitled.png?table=block&amp;id=eef0e191-c8bb-485e-a12b-1ade3bf6e920&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="[https://www.pinecone.io/learn/chunking-strategies/](https://www.pinecone.io/learn/chunking-strategies/)"></p>
+
+<p><a href="https://www.pinecone.io/learn/chunking-strategies/">https://www.pinecone.io/learn/chunking-strategies/</a></p>
+
+<p>중첩을 포함하는 또는 포함하지 않는 텍스트 분할하기</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#from transformers import BertTokenizer
+#tokenizer = BertTokenizer.from_pretrained("bert-base-multilingual-cased")
+</span>
+<span class="kn">import</span> <span class="n">tiktoken</span>
+<span class="kn">import</span> <span class="n">re</span>
+
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tiktoken</span><span class="p">.</span><span class="nf">get_encoding</span><span class="p">(</span><span class="sh">"</span><span class="s">cl100k_base</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Function to split the text into chunks of a maximum number of tokens. Inspired by OpenAI
+</span><span class="k">def</span> <span class="nf">overlapping_chunks</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">max_tokens</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="n">overlapping_factor</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+    <span class="sh">'''</span><span class="s">
+    max_tokens: tokens we want per chunk
+    overlapping_factor: number of sentences to start each chunk with that overlaps with the previous chunk
+    </span><span class="sh">'''</span>
+
+    <span class="c1"># Split the text using punctuation
+</span>    <span class="n">sentences</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sa">r</span><span class="sh">'</span><span class="s">[.?!]</span><span class="sh">'</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+    <span class="c1"># Get the number of tokens for each sentence
+</span>    <span class="n">n_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="sh">"</span><span class="s"> </span><span class="sh">"</span> <span class="o">+</span> <span class="n">sentence</span><span class="p">))</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">sentences</span><span class="p">]</span>
+    <span class="n">chunks</span><span class="p">,</span> <span class="n">tokens_so_far</span><span class="p">,</span> <span class="n">chunk</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[]</span>
+
+    <span class="c1"># Loop through the sentences and tokens joined together in a tuple
+</span>    <span class="k">for</span> <span class="n">sentence</span><span class="p">,</span> <span class="n">token</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">sentences</span><span class="p">,</span> <span class="n">n_tokens</span><span class="p">):</span>
+
+        <span class="c1"># If the number of tokens so far plus the number of tokens in the current sentence is greater 
+</span>        <span class="c1"># than the max number of tokens, then add the chunk to the list of chunks and reset
+</span>        <span class="c1"># the chunk and tokens so far
+</span>        <span class="k">if</span> <span class="n">tokens_so_far</span> <span class="o">+</span> <span class="n">token</span> <span class="o">&gt;</span> <span class="n">max_tokens</span><span class="p">:</span>
+            <span class="n">chunks</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s">. </span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="o">+</span> <span class="sh">"</span><span class="s">.</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">overlapping_factor</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="o">-</span><span class="n">overlapping_factor</span><span class="p">:]</span>
+                <span class="n">tokens_so_far</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">([</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">c</span><span class="p">))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">tokens_so_far</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># If the number of tokens in the current sentence is greater than the max number of 
+</span>        <span class="c1"># tokens, go to the next sentence
+</span>        <span class="k">if</span> <span class="n">token</span> <span class="o">&gt;</span> <span class="n">max_tokens</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Otherwise, add the sentence to the chunk and add the number of tokens to the total
+</span>        <span class="n">chunk</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">sentence</span><span class="p">)</span>
+        <span class="n">tokens_so_far</span> <span class="o">+=</span> <span class="n">token</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
+        <span class="n">chunks</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s">. </span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="o">+</span> <span class="sh">"</span><span class="s">.</span><span class="sh">"</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">chunks</span>
+</code></pre></div></div>
+
+<p>중첩을 포함하지 않는 텍스트 분할</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">text</span> <span class="o">=</span> <span class="sh">"</span><span class="s">특수 상대성 이론은 일반적으로 아인슈타인이 제안한 2가지 가정을 통한 유도법이 널리 받아들여지는데, 그것은 다음과 같다. 상대성 원리: 물리법칙이 가장 간단한 형태로 성립하는 좌표계에 대해 등속 직선 운동하는 모든 좌표계에서 동일한 물리 법칙이 적용된다. (이는 관성 좌표계를 정의한다.) 광속 불변의 원리: 모든 관성 좌표계에서 진공 중에서 진행하는 빛의 속도는 관찰자나 광원의 속도에 관계없이 일정하다. 상대성 원리는 고전역학의 가장 유서깊은 결론 중 하나이며, 광속 불변의 원리는 전자기학에서 F=ma만큼 중요한 맥스웰 방정식의 가장 단순한 표현을 갖는 결과 중 하나이다. 즉, 고전역학과 전자기학에서 핵심이 될만한 요소를 하나씩 빼다가 모은 것이다. 둘을 한마디로 합치면 </span><span class="sh">'</span><span class="s">전자기학이 상대성 원리를 따른다면?</span><span class="sh">'</span><span class="s">이라고 요약할 수 있겠다. 물론 상대성 원리는 고전역학의 산물이지만, 고전역학이 상대성 원리를 만족시킬 때와 전자기학이 상대성 원리를 만족시킬 때의 결론이 달라진다. 보다 분명히 말해서 각 역학에서의 물리법칙의 특성이 다르며, 물리법칙을 서술하는 기준인 시간과 공간이 엮이는 구조가 달라진다. 어쨌든, 당시의 가장 큰 문제의식은 두 역학을 있는 그대로 만족시키는 상대성 원리는 존재하지 않는다는 것이며, 상대성 원리를 그대로 가져간다면 어느 하나는 (혹은 둘 다) 이론이 일부 수정될 수밖에 없다는 것이다. 그리고, 당시의 실험결과는 전자기학이 상대성 원리를 위배하지 않는다는 결론에 손을 들어주고 있었다. 매우 어려운 문제이지만, 이 둘을 논리적으로 잘 엮을 수 있다면 당시 물리학의 쌍두마차였던 (지금의 일반 상대성 이론과 양자역학처럼) 두 이론을 통합하는 데 성공하게 된다. 특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다. 특수 상대성 이론을 제대로 유도하기 위해선 사실 한 가지가 더 필요한데, 바로 시간을 다시 정의해야 한다. 이것이야말로 아인슈타인의 가장 중요한 통찰 중 하나이며 이러한 과정을 거치고 나면, 시간이 진정한 의미에서 공간과 동등한 </span><span class="sh">'</span><span class="s">좌표축</span><span class="sh">'</span><span class="s">의 자격을 가지게 된다.</span><span class="sh">"</span>
+
+<span class="n">split</span> <span class="o">=</span> <span class="nf">overlapping_chunks</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">overlapping_factor</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">avg_length</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">([</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">split</span><span class="p">])</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">non-overlapping chunking approach has </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span><span class="si">}</span><span class="s"> documents with average length </span><span class="si">{</span><span class="n">avg_length</span><span class="si">:</span><span class="p">.</span><span class="mi">1</span><span class="n">f</span><span class="si">}</span><span class="s"> tokens</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>결과</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>non-overlapping chunking approach has 6 documents with average length 177.3 tokens
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[1] 특수 상대성 이론은 일반적으로 아인슈타인이 제안한 2가지 가정을 통한 유도법이 널리 받아들여지는데, 그것은 다음과 같다.  상대성 원리: 물리법칙이 가장 간단한 형태로 성립하는 좌표계에 대해 등속 직선 운동하는 모든 좌표계에서 동일한 물리 법칙이 적용된다.  (이는 관성 좌표계를 정의한다. ) 광속 불변의 원리: 모든 관성 좌표계에서 진공 중에서 진행하는 빛의 속도는 관찰자나 광원의 속도에 관계없이 일정하다.
+
+[2] 상대성 원리는 고전역학의 가장 유서깊은 결론 중 하나이며, 광속 불변의 원리는 전자기학에서 F=ma만큼 중요한 맥스웰 방정식의 가장 단순한 표현을 갖는 결과 중 하나이다.  즉, 고전역학과 전자기학에서 핵심이 될만한 요소를 하나씩 빼다가 모은 것이다.  둘을 한마디로 합치면 '전자기학이 상대성 원리를 따른다면. '이라고 요약할 수 있겠다.
+
+[3] 물론 상대성 원리는 고전역학의 산물이지만, 고전역학이 상대성 원리를 만족시킬 때와 전자기학이 상대성 원리를 만족시킬 때의 결론이 달라진다.  보다 분명히 말해서 각 역학에서의 물리법칙의 특성이 다르며, 물리법칙을 서술하는 기준인 시간과 공간이 엮이는 구조가 달라진다.
+
+[4] 어쨌든, 당시의 가장 큰 문제의식은 두 역학을 있는 그대로 만족시키는 상대성 원리는 존재하지 않는다는 것이며, 상대성 원리를 그대로 가져간다면 어느 하나는 (혹은 둘 다) 이론이 일부 수정될 수밖에 없다는 것이다.  그리고, 당시의 실험결과는 전자기학이 상대성 원리를 위배하지 않는다는 결론에 손을 들어주고 있었다.
+
+[5] 매우 어려운 문제이지만, 이 둘을 논리적으로 잘 엮을 수 있다면 당시 물리학의 쌍두마차였던 (지금의 일반 상대성 이론과 양자역학처럼) 두 이론을 통합하는 데 성공하게 된다.  특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다.  특수 상대성 이론을 제대로 유도하기 위해선 사실 한 가지가 더 필요한데, 바로 시간을 다시 정의해야 한다.
+
+[6] 이것이야말로 아인슈타인의 가장 중요한 통찰 중 하나이며 이러한 과정을 거치고 나면, 시간이 진정한 의미에서 공간과 동등한 '좌표축'의 자격을 가지게 된다. .
+
+</code></pre></div></div>
+
+<p>중첩을 포함하는 텍스트 분할</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">split</span> <span class="o">=</span> <span class="nf">overlapping_chunks</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="n">avg_length</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">([</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">split</span><span class="p">])</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">overlapping chunking approach has </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span><span class="si">}</span><span class="s"> documents with average length </span><span class="si">{</span><span class="n">avg_length</span><span class="si">:</span><span class="p">.</span><span class="mi">1</span><span class="n">f</span><span class="si">}</span><span class="s"> tokens</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>결과</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>overlapping chunking approach has 10 documents with average length 231.4 tokens
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[1] 특수 상대성 이론은 일반적으로 아인슈타인이 제안한 2가지 가정을 통한 유도법이 널리 받아들여지는데, 그것은 다음과 같다.  상대성 원리: 물리법칙이 가장 간단한 형태로 성립하는 좌표계에 대해 등속 직선 운동하는 모든 좌표계에서 동일한 물리 법칙이 적용된다.  (이는 관성 좌표계를 정의한다. ) 광속 불변의 원리: 모든 관성 좌표계에서 진공 중에서 진행하는 빛의 속도는 관찰자나 광원의 속도에 관계없이 일정하다.
+
+[2] (이는 관성 좌표계를 정의한다. ) 광속 불변의 원리: 모든 관성 좌표계에서 진공 중에서 진행하는 빛의 속도는 관찰자나 광원의 속도에 관계없이 일정하다.  상대성 원리는 고전역학의 가장 유서깊은 결론 중 하나이며, 광속 불변의 원리는 전자기학에서 F=ma만큼 중요한 맥스웰 방정식의 가장 단순한 표현을 갖는 결과 중 하나이다.  즉, 고전역학과 전자기학에서 핵심이 될만한 요소를 하나씩 빼다가 모은 것이다.
+
+[3] 상대성 원리는 고전역학의 가장 유서깊은 결론 중 하나이며, 광속 불변의 원리는 전자기학에서 F=ma만큼 중요한 맥스웰 방정식의 가장 단순한 표현을 갖는 결과 중 하나이다.  즉, 고전역학과 전자기학에서 핵심이 될만한 요소를 하나씩 빼다가 모은 것이다.  둘을 한마디로 합치면 '전자기학이 상대성 원리를 따른다면. '이라고 요약할 수 있겠다.
+
+[4] 둘을 한마디로 합치면 '전자기학이 상대성 원리를 따른다면. '이라고 요약할 수 있겠다.  물론 상대성 원리는 고전역학의 산물이지만, 고전역학이 상대성 원리를 만족시킬 때와 전자기학이 상대성 원리를 만족시킬 때의 결론이 달라진다.  보다 분명히 말해서 각 역학에서의 물리법칙의 특성이 다르며, 물리법칙을 서술하는 기준인 시간과 공간이 엮이는 구조가 달라진다.
+
+[5] 물론 상대성 원리는 고전역학의 산물이지만, 고전역학이 상대성 원리를 만족시킬 때와 전자기학이 상대성 원리를 만족시킬 때의 결론이 달라진다.  보다 분명히 말해서 각 역학에서의 물리법칙의 특성이 다르며, 물리법칙을 서술하는 기준인 시간과 공간이 엮이는 구조가 달라진다.  어쨌든, 당시의 가장 큰 문제의식은 두 역학을 있는 그대로 만족시키는 상대성 원리는 존재하지 않는다는 것이며, 상대성 원리를 그대로 가져간다면 어느 하나는 (혹은 둘 다) 이론이 일부 수정될 수밖에 없다는 것이다.
+
+[6] 보다 분명히 말해서 각 역학에서의 물리법칙의 특성이 다르며, 물리법칙을 서술하는 기준인 시간과 공간이 엮이는 구조가 달라진다.  어쨌든, 당시의 가장 큰 문제의식은 두 역학을 있는 그대로 만족시키는 상대성 원리는 존재하지 않는다는 것이며, 상대성 원리를 그대로 가져간다면 어느 하나는 (혹은 둘 다) 이론이 일부 수정될 수밖에 없다는 것이다.  그리고, 당시의 실험결과는 전자기학이 상대성 원리를 위배하지 않는다는 결론에 손을 들어주고 있었다.
+
+[7] 어쨌든, 당시의 가장 큰 문제의식은 두 역학을 있는 그대로 만족시키는 상대성 원리는 존재하지 않는다는 것이며, 상대성 원리를 그대로 가져간다면 어느 하나는 (혹은 둘 다) 이론이 일부 수정될 수밖에 없다는 것이다.  그리고, 당시의 실험결과는 전자기학이 상대성 원리를 위배하지 않는다는 결론에 손을 들어주고 있었다.  매우 어려운 문제이지만, 이 둘을 논리적으로 잘 엮을 수 있다면 당시 물리학의 쌍두마차였던 (지금의 일반 상대성 이론과 양자역학처럼) 두 이론을 통합하는 데 성공하게 된다.
+
+[8] 그리고, 당시의 실험결과는 전자기학이 상대성 원리를 위배하지 않는다는 결론에 손을 들어주고 있었다.  매우 어려운 문제이지만, 이 둘을 논리적으로 잘 엮을 수 있다면 당시 물리학의 쌍두마차였던 (지금의 일반 상대성 이론과 양자역학처럼) 두 이론을 통합하는 데 성공하게 된다.  특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다.
+
+[9] 매우 어려운 문제이지만, 이 둘을 논리적으로 잘 엮을 수 있다면 당시 물리학의 쌍두마차였던 (지금의 일반 상대성 이론과 양자역학처럼) 두 이론을 통합하는 데 성공하게 된다.  특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다.  특수 상대성 이론을 제대로 유도하기 위해선 사실 한 가지가 더 필요한데, 바로 시간을 다시 정의해야 한다.
+
+[10] 특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다.  특수 상대성 이론을 제대로 유도하기 위해선 사실 한 가지가 더 필요한데, 바로 시간을 다시 정의해야 한다.  이것이야말로 아인슈타인의 가장 중요한 통찰 중 하나이며 이러한 과정을 거치고 나면, 시간이 진정한 의미에서 공간과 동등한 '좌표축'의 자격을 가지게 된다. .
+
+</code></pre></div></div>
+
+<p>중첩을 포함하지 않는 경우 마지막 청크</p>
+
+<blockquote>
+  <p>이것이야말로 아인슈타인의 가장 중요한 통찰 중 하나이며 이러한 과정을 거치고 나면, 시간이 진정한 의미에서 공간과 동등한 ‘좌표축’의 자격을 가지게 된다.</p>
+</blockquote>
+
+<p>중첩을 포함하는 경우 마지막 청크</p>
+
+<blockquote>
+  <p>특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다.  특수 상대성 이론을 제대로 유도하기 위해선 사실 한 가지가 더 필요한데, 바로 시간을 다시 정의해야 한다.  이것이야말로 아인슈타인의 가장 중요한 통찰 중 하나이며 이러한 과정을 거치고 나면, 시간이 진정한 의미에서 공간과 동등한 ‘좌표축’의 자격을 가지게 된다.</p>
+</blockquote>
+
+<p>overlapping_factor를 2로 설정하였기에, 겹치는 문장이 2개가 됩니다. 마지막 문장을 비교해보면, 중첩을 포함하는 경우 포함하지 않는 경우보다 2개의 문장이 더 많아진 것을 볼 수 있습니다.</p>
+
+<p>중첩을 사용하면 청크의 수가 증가합니다. 중첩 비율이 높을수록 시스템에 더 많은 중복성이 생깁니다. 이 방법은 문서의 자연스러운 구조를 고려하지 않아, 정보가 청크 사이에 나누어지거나 중복된 정보가 있는 청크가 생기게 됩니다. 이러한 현상은 검색 시스템을 혼란스럽게 하게 됩니다.</p>
+
+<h1 id="맞춤형-구분-기호-찾기">
+<a class="anchor" href="#%EB%A7%9E%EC%B6%A4%ED%98%95-%EA%B5%AC%EB%B6%84-%EA%B8%B0%ED%98%B8-%EC%B0%BE%EA%B8%B0" aria-hidden="true"><span class="octicon octicon-link"></span></a>맞춤형 구분 기호 찾기</h1>
+
+<hr>
+
+<p>청킹 방법을 돕기 위해, PDF에서 페이지 분리나 단락 사이의 새로운 줄과 같은 구분 기호를 찾을 수 있습니다. 주어진 문서에 대해 텍스트 내의 자연스러운 공백을 식별하게 되면 의미 있는 텍스트 단위를 생성하게 될 것입니다. 논문 pdf에서 일반적인 공백 유형을 찾아보도록 하겠습니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">pdfplumber</span>
+<span class="kn">from</span> <span class="n">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="n">pdf</span> <span class="o">=</span> <span class="n">pdfplumber</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="sh">'</span><span class="s">evolution_of_apartment_design_and_defects_over_eras.pdf</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">pages</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">.</span><span class="n">pages</span>
+
+<span class="n">eras_doc</span> <span class="o">=</span> <span class="sh">''</span>
+<span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">pages</span><span class="p">:</span>
+    <span class="n">eras_doc</span> <span class="o">+=</span> <span class="sh">'</span><span class="se">\n\n</span><span class="sh">'</span> <span class="o">+</span> <span class="n">page</span><span class="p">.</span><span class="nf">extract_text</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>책에서는 PyPDF2를 사용하였는데, PyPDF2로 한글로 작성된 논문에서 텍스트를 추출하니 띄어쓰기를 제대로 처리하지 못하는 문제가 있어서 pdfplumber 라이브러리를 사용하였습니다.</p>
+
+<p>eras_doc의 일부분:</p>
+
+<blockquote>
+  <p>\n\n국 문 요 약\n시대별 공동주택 설계변천에 따른\n하자유형 변화 및 특징에 관한 연구\n연세대학교 공학대학원\n건 축 공 학 전 공\n강 태 준\n1960년대부터 시작된 경제개발 5개년 계획에 따라 우리나라는 급속한 경제성장과\n함께 도시화 및 산업화로 변화되었으며, 좁은 국토면적과 높은 인구밀도 등으로\n인한 주택문제를 해결하기 위해 우리나라의 특성에 적합한 주거양식인 아파트라는\n공동주택형식을 도입하게 되었다.</p>
+</blockquote>
+
+<p>그러나, pdf에서 자동으로 생성된 줄바꿈과 실제 문서의 단락을 구분하는 것을 못하기 때문에 아래의 코드를 사용하여 문장이 마무리 되지 않았는데, 줄바꿈이 된 경우 \n 을 지우는 코드를 적용하였습니다.</p>
+
+<p>제목과 같이 문장이 아닌 경우 단락을 제대로 구분하지 못하지만, 문장으로 구분된 단락은 제대로 구분하는 것을 확인할 수 있습니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">re</span>
+
+<span class="k">def</span> <span class="nf">remove_unwanted_newlines</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">re</span><span class="p">.</span><span class="nf">sub</span><span class="p">(</span><span class="sa">r</span><span class="sh">'</span><span class="s">(?&lt;!\.)\n</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s"> </span><span class="sh">'</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+<span class="n">modified_text</span> <span class="o">=</span> <span class="nf">remove_unwanted_newlines</span><span class="p">(</span><span class="n">eras_doc</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>modified_text의 일부분:</p>
+
+<blockquote>
+  <p>국 문 요 약 시대별 공동주택 설계변천에 따른 하자유형 변화 및 특징에 관한 연구 연세대학교 공학대학원 건 축 공 학 전 공 강 태 준 1960년대부터 시작된 경제개발 5개년 계획에 따라 우리나라는 급속한 경제성장과 함께 도시화 및 산업화로 변화되었으며, 좁은 국토면적과 높은 인구밀도 등으로 인한 주택문제를 해결하기 위해 우리나라의 특성에 적합한 주거양식인 아파트라는 공동주택형식을 도입하게 되었다.</p>
+</blockquote>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2Fc227f1c8-9495-45bd-b415-20580b1b802d%2FUntitled.png?table=block&amp;id=3b9f5316-740d-4bfd-8800-4e5ef34ed253&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled"></p>
+
+<p>modified_text의 일부분:</p>
+
+<blockquote>
+  <p>첫째, 공동주택의 설계는 2000년대 이전의 정형화된 평면 및 마감재 구성방식에서 소비자들의 생활방식의 변화와 욕구를 충족시킬 수 있는 다양한 평면과 마감재로 변화되고 있는 것으로 나타났다.</p>
+</blockquote>
+
+<blockquote>
+  <p>둘째, 공동주택의 하자는 건축공사의 마감공사부분이 가장 많이 발생하였으며, 주요 유형으로는 불량, 기타, 파손 등이 전체하자의 76.8~79%를 차지하고 있어 이에 따른 관리가 필요한 것으로 분석되었다.</p>
+</blockquote>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F5b42074c-1ae0-42a0-82df-2984207465be%2FUntitled.png?table=block&amp;id=32cb48a8-dcf6-44a0-bd38-5f0a7089653c&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled"></p>
+
+<p>아래 코드를 사용하여 문서에서 가장 빈번하게 발생하는 공백을 찾아낼 수 있습니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Importing the Counter and re libraries
+</span><span class="kn">from</span> <span class="n">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">import</span> <span class="n">re</span>
+
+<span class="c1"># Find all occurrences of one or more spaces in 'modified_text'
+</span><span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="nf">findall</span><span class="p">(</span><span class="sa">r</span><span class="sh">'</span><span class="s">[\s]{1,}</span><span class="sh">'</span><span class="p">,</span> <span class="n">modified_text</span><span class="p">)</span>
+
+<span class="c1"># The 10 most frequent spaces that occur in the document
+</span><span class="n">most_common_spaces</span> <span class="o">=</span> <span class="nc">Counter</span><span class="p">(</span><span class="n">matches</span><span class="p">).</span><span class="nf">most_common</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Print the most common spaces and their frequencies
+</span><span class="nf">print</span><span class="p">(</span><span class="n">most_common_spaces</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[(</span><span class="sh">'</span><span class="s"> </span><span class="sh">'</span><span class="p">,</span> <span class="mi">14214</span><span class="p">),</span> <span class="p">(</span><span class="sh">'</span><span class="se">\n</span><span class="sh">'</span><span class="p">,</span> <span class="mi">203</span><span class="p">),</span> <span class="p">(</span><span class="sh">'</span><span class="s"> </span><span class="sh">'</span><span class="p">,</span> <span class="mi">87</span><span class="p">),</span> <span class="p">(</span><span class="sh">'</span><span class="se">\n</span><span class="s"> </span><span class="sh">'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+</code></pre></div></div>
+
+<p>생성된 결과를 보고 적절한 공백을 선택하여 문서를 구분해야 합니다. 이 방법은 실용적이지만, 원본 문서에 대한 높은 이해도와 많은 지식이 필요할 수 있습니다.</p>
+
+<h1 id="의미-기반-문서-생성을-위한-클러스터링">
+<a class="anchor" href="#%EC%9D%98%EB%AF%B8-%EA%B8%B0%EB%B0%98-%EB%AC%B8%EC%84%9C-%EC%83%9D%EC%84%B1%EC%9D%84-%EC%9C%84%ED%95%9C-%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0%EB%A7%81" aria-hidden="true"><span class="octicon octicon-link"></span></a>의미 기반 문서 생성을 위한 클러스터링</h1>
+
+<hr>
+
+<p>이 접근 방법은 의미적으로 유사한 작은 청크를 결합하여 새로운 문서를 생성하는 것입니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">sklearn.cluster</span> <span class="kn">import</span> <span class="n">AgglomerativeClustering</span>
+<span class="kn">from</span> <span class="n">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">cosine_similarity</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="c1"># Assume you have a list of text embeddings called `embeddings`
+# First, compute the cosine similarity matrix between all pairs of embeddings
+</span><span class="n">cosine_sim_matrix</span> <span class="o">=</span> <span class="nf">cosine_similarity</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+
+<span class="c1"># Instantiate the AgglomerativeClustering model
+</span><span class="n">agg_clustering</span> <span class="o">=</span> <span class="nc">AgglomerativeClustering</span><span class="p">(</span>
+    <span class="n">n_clusters</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>         <span class="c1"># the algorithm will determine the optimal number of clusters based on the data
+</span>    <span class="n">distance_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># clusters will be formed until all pairwise distances between clusters are greater than 0.1
+</span>    <span class="n">affinity</span><span class="o">=</span><span class="sh">'</span><span class="s">precomputed</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># we are providing a precomputed distance matrix (1 - similarity matrix) as input
+</span>    <span class="n">linkage</span><span class="o">=</span><span class="sh">'</span><span class="s">complete</span><span class="sh">'</span>       <span class="c1"># form clusters by iteratively merging the smallest clusters based on the maximum distance between their components
+</span><span class="p">)</span>
+
+<span class="c1"># Fit the model to the cosine distance matrix (1 - similarity matrix)
+</span><span class="n">agg_clustering</span><span class="p">.</span><span class="nf">fit</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cosine_sim_matrix</span><span class="p">)</span>
+
+<span class="c1"># Get the cluster labels for each embedding
+</span><span class="n">cluster_labels</span> <span class="o">=</span> <span class="n">agg_clustering</span><span class="p">.</span><span class="n">labels_</span>
+
+<span class="c1"># Print the number of embeddings in each cluster
+</span><span class="n">unique_labels</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">unique</span><span class="p">(</span><span class="n">cluster_labels</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">unique_labels</span><span class="p">,</span> <span class="n">counts</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Cluster </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s"> embeddings</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>의미적으로 더 연관성이 있도록 청크를 생성하겠지만, 내용의 일부가 주변 텍스트와 맥락에서 벗어날 수 있다는 단점이 있습니다. 따라서 이 방법은 각 청크들이 서로 문맥적으로 연관성이 없을 때 (독립적일 때) 잘 작동하게 됩니다.</p>
+
+<h1 id="청크로-나누지-않고-전체-문서-사용하기">
+<a class="anchor" href="#%EC%B2%AD%ED%81%AC%EB%A1%9C-%EB%82%98%EB%88%84%EC%A7%80-%EC%95%8A%EA%B3%A0-%EC%A0%84%EC%B2%B4-%EB%AC%B8%EC%84%9C-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0" aria-hidden="true"><span class="octicon octicon-link"></span></a>청크로 나누지 않고 전체 문서 사용하기</h1>
+
+<hr>
+
+<p>가장 쉬운 방법이겠지만, 문서가 너무 길어서 텍스트를 임베딩할 때 context window 한계에 걸리는 경우에 단점이 있습니다. 또한 문서에 불필요한 내용들이 채워져 있다면 임베딩의 품질이 저하될 수 있습니다. 이러한 단점들은 여러 페이지의 큰 문서에서 복합적으로 나타납니다.</p>
+
+<h1 id="summary">
+<a class="anchor" href="#summary" aria-hidden="true"><span class="octicon octicon-link"></span></a>Summary</h1>
+
+<hr>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F7e7912aa-a0ce-4977-9ebc-34011e67363f%2FUntitled.png?table=block&amp;id=76fa0398-5f86-4261-9b50-d7915c3508d7&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="쉽고 빠르게 익히는 실전 LLM 82 페이지의 표 2-1"></p>
+
+<p>쉽고 빠르게 익히는 실전 LLM 82 페이지의 표 2-1</p>
+
+<h1 id="참고한-코드">
+<a class="anchor" href="#%EC%B0%B8%EA%B3%A0%ED%95%9C-%EC%BD%94%EB%93%9C" aria-hidden="true"><span class="octicon octicon-link"></span></a>참고한 코드</h1>
+
+<p><a href="https://github.com/sinanuozdemir/quick-start-guide-to-llms/blob/main/notebooks/2_semantic_search.ipynb">https://github.com/sinanuozdemir/quick-start-guide-to-llms/blob/main/notebooks/2_semantic_search.ipynb</a></p>
+
+
+<div class="about">
+<div class="about__divider">*****</div>
+<div class="about__text">
+<br>☕ Pudhina theme by Knhash 🛠️
+</div>
+</div>
+
+
+        </div>
+        <script src="/assets/vendor/highlight/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+    </body>
+</html>
