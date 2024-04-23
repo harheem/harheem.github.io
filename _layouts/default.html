@@ -10,7 +10,7 @@
         </div>
         <div class="wrapper">
             {% include header.html %}
-            {{ content }}
+            {{ content | inject_anchors }}
         </div>
         {% include externals/scripting.html %}
     </body>
