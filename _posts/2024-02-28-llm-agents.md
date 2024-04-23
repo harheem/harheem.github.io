@@ -34,7 +34,7 @@ LLM은 비만 추세를 분석하는 데 도움이 되는 차트를 생성하기
 # LLM 에이전트 프레임워크
 
 ---
-![image](https://file.notion.so/f/f/2a330106-7d16-49d5-9057-343dfb0cb92c/63dcab9c-039c-4949-ac6a-5ccfb797f858/Untitled.png?id=4247ba54-6da2-439e-9441-233d69dc6e6e&table=block&spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&expirationTimestamp=1713715200000&signature=fsj4MFTnN_6_D_CSUo4n2OJwTpyJ-OflhesZyCpxgqs&downloadName=Untitled.png)
+![image](https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fagent-framework.ad7f5098.png&w=1080&q=75)
 
 일반적으로 LLM 에이전트 프레임워크는 다음과 같은 핵심 구성 요소로 이루어질 수 있습니다:
 
@@ -55,7 +55,7 @@ LLM은 비만 추세를 분석하는 데 도움이 되는 차트를 생성하기
 
 계획 모듈은 에이전트가 사용자의 요청에 답하기 위해 해결해야 할 단계나 하위 작업들을 세분화하는 데 도움을 줍니다. 이러한 단계는 에이전트가 문제를 더 효과적으로 추론하고 신뢰할 수 있는 해결책을 찾는 데 필요합니다. 계획 모듈은 LLM을 이용하여 사용자의 질문에 도움이 되는 하위 작업을 포함한 상세한 계획을 만듭니다. 작업 분해에 사용되는 인기 있는 기술로는 [Chain of Thought](https://www.promptingguide.ai/techniques/cot)와  [Tree of Thoughts](https://www.promptingguide.ai/techniques/tot)가 있으며, 이는 단일 경로 추론과 다중 경로 추론으로 구분될 수 있습니다.  아래는 [Wang et al. 2023](https://arxiv.org/abs/2308.11432)에서 다양한 전략을 비교한 그림입니다:
 
-![Untitled](https://file.notion.so/f/f/2a330106-7d16-49d5-9057-343dfb0cb92c/b9dea6ab-34a9-451e-ac09-f1944442fb11/Untitled.png?id=df358496-5b5f-4a0d-b9ab-20ed2c270a72&table=block&spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&expirationTimestamp=1713715200000&signature=MUz7khP4n-93xDAAkK2WRdG7yyeskG7Po4SaSgT9VoU&downloadName=Untitled.png)
+![Untitled](https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ftask-decomposition.f7e3d2f9.png&w=1200&q=75)
 
 ### 피드백이 있는 계획
 
@@ -63,7 +63,7 @@ LLM은 비만 추세를 분석하는 데 도움이 되는 차트를 생성하기
 
 ReAct는 추론과 행동을 결합하여 LLM이 여러 단계(반복적으로 N회 실행)를 번갈아 가면서 복잡한 작업을 해결할 수 있도록 합니다. 이 단계들은 `생각`, `행동`, `관찰`로 구성됩니다. ReAct는 환경으로부터 관찰 형태의 피드백을 받습니다. 다른 유형의 피드백으로는 인간과 모델 피드백이 포함될 수 있습니다. 아래 그림은 ReAct의 예시와 질문에 답하는 데 관련된 다양한 단계들을 보여줍니다:
 
-![Untitled](https://file.notion.so/f/f/2a330106-7d16-49d5-9057-343dfb0cb92c/9535a86a-5ea8-41e5-aec7-a1293961e16b/Untitled.png?id=a9d22eb3-3d32-4386-b6f8-c2b9fb6dad00&table=block&spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&expirationTimestamp=1713715200000&signature=2Ri7B4KfoGLsBZFMR8-Zl0bBEuySutwDR-rEI_ydnvw&downloadName=Untitled.png)
+![Untitled](https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Freact.8e7c93ae.png&w=828&q=75)
 
 ReAct에 대해서 더 자세히 알고 싶다면 아래 문서를 참고하세요:
 
@@ -93,13 +93,13 @@ LLM은 다양한 방식으로 도구를 활용합니다:
 - [Function Calling](https://www.promptingguide.ai/applications/function_calling)은 도구 API 집합을 정의하고 이를 모델에 요청의 일부로 제공함으로써 LLM에 도구 사용 기능을 추가합니다.
 - [HuggingGPT](https://arxiv.org/abs/2303.17580)는 다양한 기존 AI 모델을 연결하여 AI 작업을 해결하는 LLM 기반 에이전트로, LLM을 작업 계획자로 활용합니다.
 
-![Untitled](https://file.notion.so/f/f/2a330106-7d16-49d5-9057-343dfb0cb92c/e0659d4a-8595-4c63-bb71-e13c9ab4b562/Untitled.png?id=328864eb-9bbf-4680-9a12-790d337bded7&table=block&spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&expirationTimestamp=1713715200000&signature=gYTN7oF1PiWpwbd7CiJEGZ9rHcy3XL4pWcejuuj35xw&downloadName=Untitled.png)
+![Untitled](https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fhugginggpt.0559fbac.png&w=1080&q=75)
 
 # LLM 에이전트 응용 사례
 
 ---
 
-![Untitled](https://file.notion.so/f/f/2a330106-7d16-49d5-9057-343dfb0cb92c/dd024a37-fbe8-4779-aece-3608a64bdeb0/Untitled.png?id=aa453817-ee1d-48d0-95fe-c3fd9d8a58d2&table=block&spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&expirationTimestamp=1713715200000&signature=VmWpltvkOtW313DhK2dhrrIjYlvVSh8t7yzQIqLI1fA&downloadName=Untitled.png)
+![Untitled](https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fchemcrow.cec3da96.png&w=1080&q=75)
 
 *ChemCrow 에이전트는 유기 합성, 약물 발견 및 재료 설계를 포함한 작업을 완료하기 위해 설계되었음. 그림 출처: Bran et al., 2023*
 
@@ -124,7 +124,7 @@ LLM은 다양한 방식으로 도구를 활용합니다:
 
 ## LLM 에이전트 도구
 
-![Untitled](https://file.notion.so/f/f/2a330106-7d16-49d5-9057-343dfb0cb92c/90c2391f-b0fc-4abd-86ee-fafd148b0760/Untitled.png?id=c1601b1a-0baa-4da7-9b45-c18e7ddfd640&table=block&spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&expirationTimestamp=1713715200000&signature=ngg-lx-sZsuqApPUyKZsENOPxoeTPbERRi8voEXP6Y0&downloadName=Untitled.png)
+![Untitled](https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fautogen.3894af4a.png&w=1920&q=75)
 
 *AutoGen 능력; 그림 출처: [https://microsoft.github.io/autogen](https://microsoft.github.io/autogen)*
 
@@ -149,7 +149,7 @@ LLM 에이전트를 구축하는 데 사용되는 주요 도구 및 프레임워
 
 ---
 
-![Untitled](https://file.notion.so/f/f/2a330106-7d16-49d5-9057-343dfb0cb92c/7dade2ce-367f-4cdd-9be5-e22ebeb72c79/Untitled.png?id=ae56456e-cdaf-49d2-8d45-e83fae7b55f1&table=block&spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&expirationTimestamp=1713715200000&signature=1i9hJnYOgt_jPF0aUGjV5pA8TgVxc3ne7cLL83ThbTw&downloadName=Untitled.png)
+![Untitled](https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fagentbench.15930893.png&w=1080&q=75)
 
 *AgentBench 벤치마크는 실제 세계의 도전과 8가지 다른 환경에서 LLM-as-Agent를 평가하기 위해 사용됩니다. 그림 출처: Liu et al. 2023*
 

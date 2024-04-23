@@ -6,6 +6,9 @@
     color: #012;
     background-color: #FFF; }
 
+  code {
+    overflow: auto; }
+
   table {
       border-collapse: collapse;
   }
