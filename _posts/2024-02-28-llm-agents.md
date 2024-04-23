@@ -144,7 +144,7 @@ LLM 에이전트를 구축하는 데 사용되는 주요 도구 및 프레임워
 - [crewAI](https://www.crewai.io/): 엔지니어를 위해 다시 구상된 AI 에이전트 프레임워크로, 강력한 기능을 간단하게 제공합니다.
 - [Phidata](https://github.com/phidatahq/phidata): 함수 호출을 사용해 AI 어시스턴트를 구축하기 위한 툴킷입니다.
 
-# LLM 에이전트 평가
+## LLM 에이전트 평가
 
 ---
 
@@ -160,7 +160,7 @@ LLM 자체를 평가하는 것처럼, LLM 에이전트를 평가하는 것도 �
 - **프로토콜**(**Protocols)**: 메트릭이 어떻게 사용되는지를 결정하는 일반적인 평가 방식입니다. 예를 들어 실제 세계 시뮬레이션, 사회적 평가, 다중 작업 평가, 소프트웨어 테스팅 등이 있습니다.
 - **벤치마크**(**Benchmarks)**: LLM 에이전트를 평가하기 위해 설계된 여러 벤치마크가 있습니다. 주목할 만한 예시로는 [ALFWorld(opens in a new tab)](https://alfworld.github.io/), [IGLU(opens in a new tab)](https://arxiv.org/abs/2304.10750), [Tachikuma(opens in a new tab)](https://arxiv.org/abs/2307.12573), [AgentBench(opens in a new tab)](https://github.com/THUDM/AgentBench), [SocKET(opens in a new tab)](https://arxiv.org/abs/2305.14938), [AgentSims(opens in a new tab)](https://arxiv.org/abs/2308.04026), [ToolBench(opens in a new tab)](https://arxiv.org/abs/2305.16504), [WebShop(opens in a new tab)](https://arxiv.org/abs/2207.01206), [Mobile-Env(opens in a new tab)](https://github.com/stefanbschneider/mobile-env), [WebArena(opens in a new tab)](https://github.com/web-arena-x/webarena), [GentBench(opens in a new tab)](https://arxiv.org/abs/2308.04030), [RocoBench(opens in a new tab)](https://project-roco.github.io/), [EmotionBench(opens in a new tab)](https://project-roco.github.io/), [PEB(opens in a new tab)](https://arxiv.org/abs/2308.06782), [ClemBench(opens in a new tab)](https://arxiv.org/abs/2305.13455), [E2E(opens in a new tab)](https://arxiv.org/abs/2308.04624) 등이 있습니다.
 
-# 도전과제
+## 도전과제
 
 ---
 
@@ -173,7 +173,7 @@ LLM 에이전트는 아직 초기 단계이며, 구축 과정에는 많은 도�
 - 지식 경계: 지식 불일치로 인해 발생할 수 있는 환각이나 사실성 문제뿐만 아니라, LLM의 지식 범위를 제어하는 것도 어려워, 이는 시뮬레이션의 효과에 큰 영향을 미칠 수 있습니다. 구체적으로, LLM의 내부 지식은 편향을 도입하거나 사용자가 모르는 지식을 활용하여 특정 환경에서 작동할 때 에이전트의 행동에 영향을 줄 수 있습니다.
 - 효율성: LLM 에이전트는 LLM이 처리해야 하는 상당한 양의 요청을 포함하는데, 이는 LLM 추론 속도에 크게 의존할 수 있어 에이전트 작업의 효율성에 영향을 줄 수 있습니다. 여러 에이전트를 배치할 때 비용도 고려해야 할 사항입니다.
 
-# 참고 자료
+## 참고 자료
 
 ---
 

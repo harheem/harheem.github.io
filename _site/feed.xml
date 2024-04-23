@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-04-23T13:26:56+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">harheem</title><subtitle>A simple, minimal Jekyll theme for a personal web page and blog, focusing on white space and readability
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-04-23T15:09:19+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">harheem</title><subtitle>A simple, minimal Jekyll theme for a personal web page and blog, focusing on white space and readability
 </subtitle><author><name>{&quot;fullname&quot;=&gt;&quot;Harheem Kim&quot;, &quot;github&quot;=&gt;&quot;harheem&quot;, &quot;linkedin&quot;=&gt;&quot;harheemk&quot;, &quot;email&quot;=&gt;&quot;shhr.kre@gmail.com&quot;}</name><email>shhr.kre@gmail.com</email></author><entry><title type="html">How to use psycopg2 in an AWS Lambda</title><link href="http://localhost:4000/dev/2024/04/08/psycopg2-lambda.html" rel="alternate" type="text/html" title="How to use psycopg2 in an AWS Lambda" /><published>2024-04-08T18:01:24+09:00</published><updated>2024-04-08T18:01:24+09:00</updated><id>http://localhost:4000/dev/2024/04/08/psycopg2-lambda</id><content type="html" xml:base="http://localhost:4000/dev/2024/04/08/psycopg2-lambda.html"><![CDATA[<h1 id="how-to-use-psycopg2-with-python-version-312-in-an-aws-lambda">How to use psycopg2 with Python version 3.12 in an AWS Lambda</h1>
 
 <blockquote>
@@ -688,7 +688,7 @@
   <li><a href="https://github.com/phidatahq/phidata">Phidata</a>: 함수 호출을 사용해 AI 어시스턴트를 구축하기 위한 툴킷입니다.</li>
 </ul>
 
-<h1 id="llm-에이전트-평가">LLM 에이전트 평가</h1>
+<h2 id="llm-에이전트-평가">LLM 에이전트 평가</h2>
 
 <hr />
 
@@ -706,7 +706,7 @@
   <li><strong>벤치마크</strong>(<strong>Benchmarks)</strong>: LLM 에이전트를 평가하기 위해 설계된 여러 벤치마크가 있습니다. 주목할 만한 예시로는 <a href="https://alfworld.github.io/">ALFWorld(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2304.10750">IGLU(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2307.12573">Tachikuma(opens in a new tab)</a>, <a href="https://github.com/THUDM/AgentBench">AgentBench(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2305.14938">SocKET(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2308.04026">AgentSims(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2305.16504">ToolBench(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2207.01206">WebShop(opens in a new tab)</a>, <a href="https://github.com/stefanbschneider/mobile-env">Mobile-Env(opens in a new tab)</a>, <a href="https://github.com/web-arena-x/webarena">WebArena(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2308.04030">GentBench(opens in a new tab)</a>, <a href="https://project-roco.github.io/">RocoBench(opens in a new tab)</a>, <a href="https://project-roco.github.io/">EmotionBench(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2308.06782">PEB(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2305.13455">ClemBench(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2308.04624">E2E(opens in a new tab)</a> 등이 있습니다.</li>
 </ul>
 
-<h1 id="도전과제">도전과제</h1>
+<h2 id="도전과제">도전과제</h2>
 
 <hr />
 
@@ -721,7 +721,7 @@
   <li>효율성: LLM 에이전트는 LLM이 처리해야 하는 상당한 양의 요청을 포함하는데, 이는 LLM 추론 속도에 크게 의존할 수 있어 에이전트 작업의 효율성에 영향을 줄 수 있습니다. 여러 에이전트를 배치할 때 비용도 고려해야 할 사항입니다.</li>
 </ul>
 
-<h1 id="참고-자료">참고 자료</h1>
+<h2 id="참고-자료">참고 자료</h2>
 
 <hr />
 

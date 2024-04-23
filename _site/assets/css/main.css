@@ -63,12 +63,13 @@
   .section-nav {
     border-radius: 6px;
     border: 1px solid #e7e5e5;
+    background: rgba(248, 248, 248, 0.5);
     position: fixed;
     left: 50%;
-    transform: translateX(430px);
+    transform: translateX(420px);
     top: 200px;
     width: 200px; 
-    padding: 5px;
+    padding-right: 5px;
     font-size: 13px;
     overflow-y: auto; }
 
