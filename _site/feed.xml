@@ -1,0 +1,1299 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-04-23T12:26:41+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">harheem</title><subtitle>A simple, minimal Jekyll theme for a personal web page and blog, focusing on white space and readability
+</subtitle><author><name>{&quot;fullname&quot;=&gt;&quot;Harheem Kim&quot;, &quot;github&quot;=&gt;&quot;harheem&quot;, &quot;linkedin&quot;=&gt;&quot;harheemk&quot;, &quot;email&quot;=&gt;&quot;shhr.kre@gmail.com&quot;}</name><email>shhr.kre@gmail.com</email></author><entry><title type="html">How to use psycopg2 in an AWS Lambda</title><link href="http://localhost:4000/dev/2024/04/08/psycopg2-lambda.html" rel="alternate" type="text/html" title="How to use psycopg2 in an AWS Lambda" /><published>2024-04-08T18:01:24+09:00</published><updated>2024-04-08T18:01:24+09:00</updated><id>http://localhost:4000/dev/2024/04/08/psycopg2-lambda</id><content type="html" xml:base="http://localhost:4000/dev/2024/04/08/psycopg2-lambda.html"><![CDATA[<h1 id="how-to-use-psycopg2-with-python-version-312-in-an-aws-lambda">How to use psycopg2 with Python version 3.12 in an AWS Lambda</h1>
+
+<blockquote>
+  <p>This article describes how to use psycopg2 with Python version 3.12 in an AWS Lambda environment. The process involves adjusting and applying methods verified in Python 3.9 to suit the Python 3.12 environment.</p>
+
+</blockquote>
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">psycopg2</code></strong> is a Python library for connecting to PostgreSQL databases. PostgreSQL is an open-source relational database system widely used in various projects and applications. psycopg2 is a tool that facilitates interaction with PostgreSQL.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">AWS Lambda</code></strong> is a service that allows code execution without a server, charging only for the computing resources used. This service offers several advantages, including automatic scalability and event-based execution.</li>
+</ul>
+
+<h2 id="preparing-psycopg2-in-python-39-using-docker"><strong>Preparing psycopg2 in Python 3.9 (Using Docker)</strong></h2>
+
+<hr />
+
+<p><a href="https://github.com/aws/aws-cdk/discussions/28339">Unable to import module ‘testdb’: No module named ‘psycopg2._psycopg’ · aws aws-cdk · Discussion #28339</a></p>
+
+<p>I realized that the questioner was facing the same issue I had experienced. One of the answers suggested using Docker, and I decided to test this method out.</p>
+
+<p>First, create a working directory and record psycopg2-binary in the requirements.txt file.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mkdir</span> <span class="k">lambda</span>
+<span class="n">cd</span> <span class="k">lambda</span>
+<span class="n">echo</span> <span class="sh">'</span><span class="s">psycopg2-binary</span><span class="sh">'</span> <span class="o">&gt;</span> <span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
+</code></pre></div></div>
+
+<p>Next, use Docker to install the necessary libraries in the Python 3.9 environment and create a psycopg2.zip file.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">v</span> <span class="sh">"</span><span class="s">$PWD</span><span class="sh">"</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">task</span> <span class="sh">"</span><span class="s">amazon/aws-sam-cli-build-image-python3.9</span><span class="sh">"</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="sh">"</span><span class="s">pip install -r requirements.txt -t python/lib/python3.9/site-packages/; exit</span><span class="sh">"</span>
+<span class="nb">zip</span> <span class="o">-</span><span class="n">r</span> <span class="n">psycopg2</span><span class="p">.</span><span class="nb">zip</span> <span class="n">python</span>
+</code></pre></div></div>
+
+<p>By this method, the created psycopg2.zip file can be registered as a Lambda layer, allowing you to import psycopg2. This is a safe method as it involves downloading psycopg2 in AWS Linux.</p>
+
+<p>You can learn more about registering a Lambda layer in <a href="https://docs.aws.amazon.com/ko_kr/lambda/latest/dg/adding-layers.html">this article</a>.</p>
+
+<h2 id="preparing-psycopg2-in-python-312-using-docker"><strong>Preparing psycopg2 in Python 3.12 (Using Docker)</strong></h2>
+
+<hr />
+
+<p>The same process was then applied in the Python 3.12 environment using the following commands.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">echo</span> <span class="sh">'</span><span class="s">psycopg2-binary</span><span class="sh">'</span> <span class="o">&gt;</span> <span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">v</span> <span class="sh">"</span><span class="s">$PWD</span><span class="sh">"</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">task</span> <span class="sh">"</span><span class="s">public.ecr.aws/sam/build-python3.12:latest</span><span class="sh">"</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="sh">"</span><span class="s">pip install -r requirements.txt -t python/lib/python3.12/site-packages/; exit</span><span class="sh">"</span>
+<span class="nb">zip</span> <span class="o">-</span><span class="n">r</span> <span class="n">psycogpg2</span><span class="p">.</span><span class="nb">zip</span> <span class="n">python</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="n">Python</span> <span class="mf">3.12</span><span class="p">.</span><span class="mi">2</span> <span class="p">(</span><span class="n">main</span><span class="p">,</span> <span class="n">Mar</span> <span class="mi">15</span> <span class="mi">2024</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span><span class="mi">09</span><span class="p">:</span><span class="mi">09</span><span class="p">)</span> <span class="p">[</span><span class="n">GCC</span> <span class="mf">11.4</span><span class="p">.</span><span class="mi">1</span> <span class="mi">20230605</span> <span class="p">(</span><span class="n">Red</span> <span class="n">Hat</span> <span class="mf">11.4</span><span class="p">.</span><span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="p">)]</span> <span class="n">on</span> <span class="n">linux</span>
+<span class="n">Type</span> <span class="sh">"</span><span class="s">help</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">copyright</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">credits</span><span class="sh">"</span> <span class="ow">or</span> <span class="sh">"</span><span class="s">license</span><span class="sh">"</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="p">.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="n">sys</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sys</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="nf">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="sh">"</span><span class="s">/var/task/python/lib/python3.12/site-packages/</span><span class="sh">"</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="n">psycopg2</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">psycopg2</span><span class="p">.</span><span class="n">__version__</span>
+<span class="sh">'</span><span class="s">2.9.9 (dt dec pq3 ext lo64)</span><span class="sh">'</span>
+</code></pre></div></div>
+
+<p>In the Docker container environment, I confirmed that psycopg2 was successfully imported.</p>
+
+<p>After registering it as a Lambda layer using the same method, I executed the code.</p>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F6a14bf8d-a450-46db-a868-0e028a24fd54%2FUntitled.png?table=block&amp;id=d213fc2c-e291-4fa4-8820-38164aec72eb&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled" /></p>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2Fd92ffa5e-f133-4f3a-978b-15d654b84559%2FUntitled.png?table=block&amp;id=92a8d8b9-45dc-444e-9b1d-928cbafc7eaa&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled" /></p>
+
+<p>As a result, the psycopg2 version was correctly displayed in the Python 3.12 environment. The image used was <a href="http://public.ecr.aws/sam/build-python3.12:latest">public.ecr.aws/sam/build-python3.12:latest</a>, and the Lambda function was set up for Python 3.12 arm64. If a different architecture is needed, you can find the desired image at <a href="https://gallery.ecr.aws/sam/build-python3.12">this link</a>.</p>
+
+<p>The registered ARN is as follows. Registering it as a layer is convenient as it can be easily used in other functions.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>arn:aws:lambda:ap-northeast-2:550316102722:layer:psycopg2-binary-arm64-312:1
+</code></pre></div></div>]]></content><author><name>Harheem Kim</name></author><category term="Dev" /><summary type="html"><![CDATA[How to use psycopg2 with Python version 3.12 in an AWS Lambda]]></summary></entry><entry><title type="html">RAG for LLMs</title><link href="http://localhost:4000/llm/2024/03/08/rag.html" rel="alternate" type="text/html" title="RAG for LLMs" /><published>2024-03-08T21:56:55+09:00</published><updated>2024-03-08T21:56:55+09:00</updated><id>http://localhost:4000/llm/2024/03/08/rag</id><content type="html" xml:base="http://localhost:4000/llm/2024/03/08/rag.html"><![CDATA[<h1 id="retrieval-augmented-generation-rag-for-llms">Retrieval Augmented Generation (RAG) for LLMs</h1>
+
+<p>Retrieval Augmented Generation(RAG)은 대규모 언어 모델, 즉 LLM(Large Language Models)의 한계를 해결하기 위한 효과적인 방법입니다. 이 방식은 데이터베이스 같은 외부 지식원을 LLM에 결합시켜, 도메인 지식의 격차, 사실적 오류, 그리고 잘못된 정보 생성(hallucination)과 같은 문제들을 줄일 수 있습니다. 특히, 지속적으로 변화하고 업데이트되는 정보가 필요한 분야나 특정한 응용 프로그램에서 RAG는 큰 장점을 가지게 됩니다. RAG의 뛰어난 점은 특정 작업이나 응용 프로그램에 맞추어 LLM을 다시 학습시킬 필요가 없다는 것입니다. 최근에는 대화형 에이전트 분야에서 RAG의 활용이 늘어나며 그 인기가 많아지고 있습니다.</p>
+
+<p>이 글은 최근 발표된 ‘<a href="https://arxiv.org/abs/2312.10997">Retrieval-Augmented Generation for Large Language Models: A Survey</a> (Gao et al., 2023)’라는 논문에서 중요한 발견과 실질적인 인사이트를 요약합니다. 특히, 현재의 접근 방법, 최신 RAG 기술, 평가 방법, 응용 프로그램, 그리고 RAG 시스템을 구성하는 다양한 요소들(검색, 생성, 증강 기술)을 둘러싼 기술에 집중하여 설명합니다.</p>
+
+<h1 id="rag란"><strong>RAG란?</strong></h1>
+
+<hr />
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Frag-framework.81dc2cdc.png&amp;w=3840&amp;q=75" alt="Untitled" /></p>
+
+<p><a href="https://www.promptingguide.ai/techniques/rag">RAG</a>는 다음과 같이 정의될 수 있습니다:</p>
+
+<blockquote>
+  <p>RAG는 입력을 받아 해당하는 출처(예: 위키백과)에서 관련 문서를 찾아냅니다. 이 문서들은 원래의 입력 프롬프트와 함께 컨텍스트로 연결되어, 텍스트 생성기를 통해 결과물을 만들어냅니다. 이 과정을 통해 RAG는 시간이 지나면서 변화하는 정보에도 적응할 수 있습니다. 이는 LLM의 고정된 매개 변수 지식에 대한 효과적인 해결책이 됩니다. RAG 덕분에 언어 모델은 다시 학습할 필요 없이 검색 기반 생성을 통해 최신 정보에 기반한 신뢰할 수 있는 결과물을 만들 수 있습니다.</p>
+
+</blockquote>
+
+<p>간단히 말해서, RAG에서 검색된 정보는 LLM 응답의 정확성, 제어 가능성 및 관련성을 높이는 데 활용됩니다. 그렇기 때문에, 변화하는 환경에서 발생할 수 있는 거짓된 정보 생성이나 성능 문제를 줄이는 데 도움이 됩니다.</p>
+
+<p>RAG는 사전 교육(Pre-traing) 방법의 개선과 관련이 있습니다. 그러나, 현재는 RAG와 <a href="https://www.promptingguide.ai/models/chatgpt">ChatGPT</a>나 <a href="https://www.promptingguide.ai/models/mixtral">Mixtral</a>과 같은 성능이 뛰어난 모델(Fine-tuning)의 장점을 결합하는 데 중점을 두고 있습니다. 아래 차트는 RAG 연구의 발전을 보여줍니다.</p>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Frag-evolution.929ab78b.png&amp;w=1080&amp;q=75" alt="Untitled" /></p>
+
+<p>아래 그림은 RAG 응용 프로그램의 일반적인 워크플로우를 보여줍니다.</p>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Frag-process.c8703891.png&amp;w=1080&amp;q=75" alt="Untitled" /></p>
+
+<p>위 그림에서 나온 다양한 단계 및 구성 요소를 설명해보겠습니다:</p>
+
+<ul>
+  <li>입력(Input): LLM 시스템이 응답해야 할 질문을 ‘입력’이라고 합니다. RAG를 사용하지 않는 경우, LLM은 직접 질문에 대답합니다.</li>
+  <li>색인 생성(Indexing): RAG를 사용할 때는 관련 문서들이 먼저 작은 단위로 나뉘어 색인화됩니다. 추론 과정에서는 질문도 비슷한 방식으로 임베딩됩니다.</li>
+  <li>검색(Retrieval): 질문과 관련된 문서들은 색인된 벡터와 비교하여 검색됩니다. 이 문서들을 ‘관련 문서(Relevant Documents)’라고 부릅니다.</li>
+  <li>생성(Generation): 관련 문서들은 원래의 질문과 추가 컨텍스트로 함께 결합됩니다. 이 결합된 텍스트와 질문은 모델에 전달되어 시스템의 최종 응답을 생성하는 데 사용됩니다.</li>
+</ul>
+
+<p>제공된 예시에서, 모델만을 사용했을 때 현재 사건에 대한 지식 부족으로 질문에 응답하지 못하였습니다. 반면, RAG를 사용할 때 시스템은 모델이 질문에 적절하게 대답할 수 있도록 필요한 정보를 제공해주었습니다.</p>
+
+<h1 id="rag-paradigms"><strong>RAG Paradigms</strong></h1>
+
+<hr />
+
+<p>최근 몇 년 동안 RAG 시스템은 Naive RAG에서 Advanced RAG, Modular RAG로 발전해왔습니다. 이러한 발전은 성능과 비용, 효율성과 관련된 특정 제한 사항을 해결하기 위한 것입니다.</p>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Frag-paradigms.21be1d6f.png&amp;w=1080&amp;q=75" alt="Untitled" /></p>
+
+<h2 id="naive-rag"><strong>Naive RAG</strong></h2>
+
+<h3 id="naive-rag-1"><strong>Naive RAG</strong></h3>
+
+<p>Naive RAG는 색인 생성과 검색, 생성 순으로 전통적인 단계를 거칩니다. 사용자의 입력은 관련 문서를 찾는 데 사용되고, 이 문서들은 최종 응답을 생성하는 모델에 전달되기 전에 프롬프트와 결합됩니다. 여러 단계의 대화 상호작용이 필요한 응용 프로그램에서는 대화 이력을 프롬프트에 통합할 수 있습니다.</p>
+
+<p>Naive RAG는 검색된 문서의 순서나 정확도 문제(낮은 정밀도), 관련 문서를 찾지 못하는 문제(낮은 재현율) 등의 한계를 가지고 있습니다. 또한, RAG 시스템이 해결해야 할 주요한 문제 중 하나가 LLM에게 오래된 정보를 제공한다는 것입니다. 이로 인해 잘못된 정보 생성이나 부정확한 응답이 나타날 수 있습니다.</p>
+
+<p>증강을 적용할 때, 중복이나 반복과 같은 문제도 발생할 수 있습니다. 또한, 여러 검색 결과를 사용할 때, 순위 매기기와 스타일 또는 톤 조정도 중요합니다. 또 다른 도전 과제는 생성 작업이 검색된 정보에 지나치게 의존하게 되어 모델이 검색된 내용을 단순 반복하게 되는 것이 있습니다.</p>
+
+<h2 id="advanced-rag">Advanced RAG</h2>
+
+<p>Advanced RAG는 기존의 Naive RAG에서 발생하는 문제들을 해결하는 데 도움을 줍니다. 예를 들어, 검색 품질을 개선하는 것이 포함될 수 있는데, 여기에는 사전 검색(Pre-Retrieval)과 검색(Retrieval), 사후 검색(Post-Retrieval) 과정을 최적화하는 것을 의미합니다.</p>
+
+<p>사전 검색 과정은 데이터 색인 생성을 최적화하는 것을 포함하며, 이 과정에서는 데이터의 질을 높이기 위해 다섯 가지 단계(데이터 세분화 향상, 색인 구조 최적화, 메타데이터 추가, 정렬 최적화, 혼합 검색)를 거칩니다.</p>
+
+<p>임베딩 모델을 개선하는 것으로 검색의 성능을 향상시킬 수 있습니다. 예를 들어, 임베딩 모델을 미세 조정하거나 컨텍스트 이해를 더 잘 포착하는 동적 임베딩(예: OpenAI의 embeddings-ada-02 모델)을 사용하는 것으로 임베딩 모델을 개선할 수 있습니다. 임베딩 모델은 컨텍스트를 구성하는 청크의 질에 직접적인 영향을 줍니다.</p>
+
+<p>사후 검색 최적화는 컨텍스트 윈도우의 한계를 극복할뿐만 아니라  잡음이 많거나 필요가 없는 정보를 처리하는 데 중점을 둡니다. 이 문제를 해결하는 일반적인 방법은 재순위 매기기(re-ranking)입니다. 이 방법은 관련 컨텍스트를 프롬프트의 가장자리로 재배치하거나 질문과 관련 텍스트 청크 사이의 의미론적 유사성을 다시 계산하는 것을 포함할 수 있습니다. 프롬프트 압축도 이러한 문제를 다루는 데 유용할 수 있습니다.</p>
+
+<h2 id="modular-rag">Modular RAG</h2>
+
+<p>Modular RAG는 검색 기능과 같은 다양한 기능 모듈을 통합하여 성능을 개선하는 것을 의미합니다. 예를 들어, 유사성 검색을 위한 검색 모듈을 통합하고 검색기를 미세 조정하는 방식입니다. Naive RAG와 Advanced RAG는 모두 Modular RAG의 특정 형태로 볼 수 있습니다. 확장된 RAG 모듈에는 검색, 메모리, 융합, 라우팅, 예측, 태스크 어댑터 등 다양한 문제 해결을 위한 모듈이 포함될 수 있으며, 이들은 특정 문제 맥락에 맞게 조정될 수 있습니다. 따라서 Modular RAG는 모듈을 추가하거나 교체하고 작업 요구 사항에 맞게 모듈 간의 흐름을 조정할 수 있는 더 큰 다양성과 유연성을 제공합니다.</p>
+
+<p>RAG 시스템 구축의 유연성이 증가함에 따라, RAG 파이프라인을 최적화하기 위한 여러 기술이 제안되었습니다:</p>
+
+<ul>
+  <li><strong>하이브리드 검색 탐색(Hybrid Search Exploration):</strong> 이 접근법은 키워드 기반 검색과 의미론적 검색을 결합하여 더 관련성 높고 컨텍스트가 풍부한 정보를 검색합니다. 다양한 질문 유형과 정보 요구 사항을 처리하는 데 유용할 수 있습니다.</li>
+  <li><strong>재귀적 검색 및 질의 엔진(Recursive Retrieval and Query Engine):</strong> 이 방법은 작은 의미 청크에서 시작하여 점차 컨텍스트를 풍부하게 하는 큰 청크를 검색하는 재귀적 프로세스를 포함합니다. 이는 효율성과 컨텍스트가 풍부한 정보 간의 균형을 맞추는 데 유용합니다.</li>
+  <li><strong>StepBack-prompt:</strong> 이  <a href="https://arxiv.org/abs/2310.06117">프롬프팅 기술</a>은 LLM의 추론을 위한 개념과 원칙을 생성하도록 유도합니다. 이 프롬프트가 RAG 프레임워크에 적용될 때, LLM은 구체적인 사례에서 벗어나 더 넓은 범위의 추론을 할 수 있게 되므로 신뢰도가 높은 응답을 생성할 수 있게 됩니다.</li>
+  <li><strong>하위 질의(Sub-Queries):</strong> 다양한 질의 전략을 활용하여 복잡한 질문을 여러 개의 하위 질문으로 분할할 수 있습니다. 이는 트리 구조로 질의하거나 순차적으로 청크를 질의하는 등 다양한 시나리오에 적용 가능합니다. LlamaIndex는 <a href="https://docs.llamaindex.ai/en/latest/understanding/putting_it_all_together/agents.html#">하위 질문 질의 엔진</a>을 제공하여 이러한 하위 질문을 사용해 다양한 데이터 소스를 효과적으로 활용할 수 있도록 지원합니다.</li>
+  <li><strong>가상 문서 임베딩(Hypothetical Document Embeddings):</strong> <a href="https://arxiv.org/abs/2212.10496">HyDE</a>는 질문에 대한 가상의 답변을 생성하고 이 답변을 임베딩하는 작업을 수행합니다. 질문을 직접 사용하는 것 대신에 생성된 가상 답변과 유사한 문서를 검색합니다.</li>
+</ul>
+
+<h1 id="rag-프레임워크">RAG 프레임워크</h1>
+
+<hr />
+
+<p>이 단락에서는 RAG 시스템의 구성 요소인 검색(Retrieval), 생성(Generation), 증강(Augmentation)의 핵심 내용을 설명합니다.</p>
+
+<h3 id="검색">검색</h3>
+
+<p>검색은 RAG 시스템에서 retriever로부터 관련성 높은 관련성을 가진 문맥을 검색하는 부분입니다. 검색기는 다음과 같은 여러 방법으로 향상될 수 있습니다:</p>
+
+<p><strong>의미 표현 개선하기</strong></p>
+
+<p>retriever의 핵심인 의미 표현을 직접적으로 개선하는 과정을 살펴보겠습니다. 여기서 고려해야 할 사항은 다음과 같습니다:</p>
+
+<ul>
+  <li><strong>청킹(Chunking):</strong> 다루고 있는 콘텐츠와 응답을 생성하는 애플리케이션을 고려하여 최적의 청킹 방법을 선택하는 것이 중요합니다. 모델마다 블록 크기에 따른 성능 차이가 존재합니다. Sentence transformers는 단일 문장에서, text-embedding-ada-002는 256 또는 512 토큰 블록에서 더 좋은 성능을 보입니다. 또한, 사용자 질문의 길이, 애플리케이션, 토큰 제한 등 여러 요소를 고려할 수 있습니다. 보통은 다양한 청킹 방법을 실험해보면서 RAG 시스템의 검색 성능을 최적화합니다.</li>
+  <li><strong>임베딩 모델 미세 조정:</strong> 청킹 방법을 결정했다면, 미세 조정을 고려할 수 있습니다. 특히, 전문 분야를 다룰 때 미세 조정을 하지 않으면 애플리케이션에서 사용자의 질문을 제대로 이해하지 못할 가능성이 높습니다. 미세 조정은 광범위한 도메인 지식(도메인 지식 미세 조정)이나 특정 작업에 대해 수행할 수 있습니다. <a href="https://github.com/FlagOpen/FlagEmbedding">BAAI에서 개발한 BGE-large-EN</a>은 검색 관련성을 높이기 위해 미세 조정할 수 있는 대표적인 임베딩 모델입니다.</li>
+</ul>
+
+<p><strong>질문과 문서 정렬하기</strong></p>
+
+<p>사용자 질문에 의미 정보가 부족하거나 애매한 표현이 있을 때 정렬을 적용해볼 수 있습니다. 의미 공간 상에서 사용자 질문을 문서와 정렬하는 방법입니다. 접근 방식으로는 다음과 같은 것들이 있습니다:</p>
+
+<ul>
+  <li><strong>질문 다시 작성하기:</strong> <a href="https://arxiv.org/abs/2303.07678">Query2Doc</a>와 <a href="https://arxiv.org/abs/2305.15294">ITER-RETGEN</a>, HyDE 등 다양한 기술을 활용해 질문을 다시 작성하는 데 초점을 맞춥니다.</li>
+  <li><strong>임베딩 변환하기:</strong> 질문 임베딩의 표현을 최적화하고, 특정 작업과 더 밀접하게 정렬된 잠재 공간에 맞추는 방법입니다.</li>
+</ul>
+
+<p><strong>Retriever와 LLM 정렬하기</strong></p>
+
+<p>retriever의 출력 결과를 LLM이 선호하는 방향으로 정렬하는 방법입니다.</p>
+
+<ul>
+  <li><strong>Retriever</strong> 미세 조정<strong>:</strong> LLM의 피드백을 활용하여 검색 모델을 개선합니다. Augmentation adapted retriever(AAR), REPLUG, UPRISE 등이 여기에 해당됩니다.</li>
+  <li><strong>어댑터:</strong> <a href="https://aclanthology.org/2023.emnlp-main.326/">PRCA</a>, <a href="https://arxiv.org/abs/2310.04408">RECOMP</a>, <a href="https://arxiv.org/abs/2305.04757">PKG</a> 등 의 외부 어댑터를 도입하여 정렬 과정을 수행할 수 있습니다.</li>
+</ul>
+
+<h3 id="생성">생성</h3>
+
+<p>RAG 시스템에서 생성기는 검색된 정보를 바탕으로 자연스러운 텍스트를 생성해 최종 출력을 만들어내는 역할을 담당합니다. 이 과정은 다양한 입력 데이터를 포함하며, 쿼리와 문서에서 파생된 입력 데이터에 대한 언어 모델을 적응시키는 노력이 필요할 때도 있습니다. 이는 검색 이후의 처리 및 미세 조정 통해 해결할 수 있습니다.</p>
+
+<ul>
+  <li><strong>Frozen LLM을 활용한 검색 이후의 처리:</strong> 이 방법은 LLM을 그대로 두고, 정보 압축이나 결과 재순위화 같은 작업으로 검색 결과의 품질을 높이데 중점을 둡니다. 정보 압축은 노이즈를 줄이고 LLM의 컨텍스트 길이 제한 문제를 해결하며 생성 효과를 높여줍니다. 재순위화는 관련성이 높은 문서를 상위에 배치하도록 순서를 조정합니다.</li>
+  <li>RAG를 위한 LLM 미세 조정<strong>:</strong> RAG 시스템의 성능을 높이기 위해, 생성기를 추가로 최적화하거나 미세 조정해서 검색된 문서를 잘 활용하게 하는 동시에 자연스러운 텍스트를 생성하도록 조정하는 방법입니다.</li>
+</ul>
+
+<h3 id="증강">증강</h3>
+
+<p>증강은 검색된 패시지의 문맥을 현재 생성 작업과 효과적으로 통합하는 과정을 말합니다. 증강 과정, 증강 단계, 그리고 증강 데이터에 대해 논의하기 전에, RAG의 핵심 구성 요소를 살펴보겠습니다:</p>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Frag-taxonomy.e3b19705.png&amp;w=1920&amp;q=75" alt="Untitled" /></p>
+
+<p>검색 증강은 사전 학습, 파인 튜닝, 추론과 같은 다양한 단계에 적용될 수 있습니다.</p>
+
+<ul>
+  <li><strong>증강 단계 개선:</strong> <a href="https://arxiv.org/abs/2112.04426">RETRO</a>는 대규모 사전 학습을 위한 검색 증강 시스템입니다. 이 시스템은 외부 지식을 기반으로 하는 추가 인코더를 사용합니다. RETRO는 RAG 시스템과 결합되어 개발 및 성능 향상에 기여할 수 있으며, 추론 단계에서는 RAG 프로세스를 보다 정교하게 만들고 특정 작업 요구 사항에 맞게 검색된 콘텐츠를 효율적으로 통합하기 위해 다양한 기술을 적용합니다.</li>
+  <li><strong>증강 소스의 중요성:</strong> RAG 모델의 성능은 증강 데이터 소스의 선택에 크게 의존합니다. 이러한 데이터는 비정형 데이터, 정형 데이터, LLM 생성 데이터로 분류할 수 있습니다.</li>
+  <li><strong>증강 프로세스의 다양성:</strong> 복잡한 문제 해결을 위해 다양한 증강 방법이 제안되었습니다:
+    <ul>
+      <li><strong>반복 검색:</strong> 이 방식은 모델이 정보의 깊이와 관련성을 향상시키기 위해 여러 검색 주기를 수행합니다. RETRO와 GAR-meets-RAG는 이 방식을 활용하는 주목할만한 예시입니다.</li>
+      <li><strong>재귀 검색:</strong> 이 방식은 한 검색 단계의 결과를 다음 검색 단계의 입력으로 재귀적으로 사용합니다. 이를 통해 학술 연구 및 법률 사례 분석과 같은 복잡한 다단계 쿼리에 대한 정보를 깊이 있게 탐색할 수 있습니다. IRCoT와 Tree of Clarifications가 이 방식을 사용하는 주요 예시입니다.</li>
+      <li><strong>적응형 검색:</strong> 이 방식은 최적의 검색 시점과 콘텐츠를 결정함으로써 특정 요구에 맞게 검색 프로세스를 조정합니다. FLARE와 Self-RAG는 적응형 검색을 활용하는 주요 접근 방식입니다.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>아래 그림은 RAG 연구를 다양한 증강 측면으로 상세하게 묘사하고 있으며, 여기에는 증강 단계, 소스, 프로세스가 포함됩니다.</p>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Frag-augmentation.0855501d.png&amp;w=1200&amp;q=75" alt="Untitled" /></p>
+
+<h3 id="rag-vs-파인-튜닝"><strong>RAG vs. 파인 튜닝</strong></h3>
+
+<p>RAG와 파인 튜닝 간의 차이점과 각각의 적합한 상황에 대한 토론이 활발히 이루어지고 있습니다. 이 두 분야의 연구에 따르면, RAG는 새로운 지식을 통합하는 데에 효과적이며, 반면 파인 튜닝은 내부 지식, 출력 형식 및 복잡한 지시사항을 이해하는 능력을 개선함으로써 모델의 성능과 효율성을 높일 수 있다고 합니다. 이 두 방법은 상호 배타적이지 않으며, 복잡하고 지식 집약적이며 확장 가능한 응용 프로그램에 LLM을 사용함에 있어, 빠르게 변화하는 지식에 대한 접근과 특정 형식, 어조, 스타일을 갖춘 맞춤형 응답이 필요할 때 서로를 보완하며 반복적인 개선 과정을 거칠 수 있습니다. 이와 더불어, 프롬프팅 엔지니어링은 모델의 기본 기능을 활용하여 결과를 최적화하는 데 중요한 역할을 할 수 있습니다. 아래는 RAG가 다른 모델 최적화 방법들과 비교했을 때 갖는 다양한 특성을 보여주는 그림입니다:</p>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Frag-optimization.bb88c6ae.png&amp;w=1080&amp;q=75" alt="Untitled" /></p>
+
+<p>다음은 RAG와 파인 튜닝된 모델들 간의 특징을 비교한 논문에서 가져온 표입니다:</p>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Frag-vs-finetuning.545747e9.png&amp;w=828&amp;q=75" alt="Untitled" /></p>
+
+<h2 id="rag-평가">RAG 평가</h2>
+
+<p>LLM의 다양한 측면에 대해서 성능을 측정하는 것과 마찬가지로, RAG를 평가하는 것은 다양한 애플리케이션 시나리오에서 모델의 성능을 이해하고 최적화하는 데 중요한 역할을 합니다. 전통적으로 RAG 시스템은 F1이나 EM 같은 특정 작업에 초점을 맞춘 평가 지표를 통해 평가되었습니다. 예를 들어,  <a href="https://arxiv.org/abs/2308.10633v2">RaLLe</a>는 지식 집약적 작업에서 검색 기능을 강화한 대규모 언어 모델의 성능을 평가하는 데 사용됩니다.</p>
+
+<p>RAG 평가는 검색된 내용과 생성된 콘텐츠의 품질을 모두 평가하는 것을 목표로 합니다. 검색 품질은 NDCG와 적중률 같은, 추천 시스템이나 정보 검색 분야에서 사용되는 평가 지표로 측정됩니다. 생성 품질 평가는 2가지의 경우로 나누어집니다. 레이블이 지정되지 않은 콘텐츠의 경우 관련성과 유해성을, 레이블이 있는 콘텐츠의 경우 정확성을 평가합니다. RAG 평가 방법은 수동적이거나 자동화된 접근 방식을 사용할 수 있습니다.</p>
+
+<p>RAG 프레임워크의 평가는 세 가지 주요 품질 지표와 네 가지 능력을 중심으로 이루어집니다. 품질 지표에는 검색된 내용의 관련성, 답변의 충실성, 그리고 제시된 질문에 대한 답변의 관련성이 포함됩니다. 또한, RAG 시스템의 적응성과 효율성을 측정하는 데 도움이 되는 네 가지 능력도 평가에 있어 중요한 요소입니다. 여기에는 잡음에 대한 견고성, 부적절한 내용을 거부하는 능력, 다양한 정보를 통합하는 능력, 그리고 반사실적 상황에 대한 견고성이 포함됩니다. 아래는 RAG 시스템의 다양한 측면을 평가하는 데 사용되는 주요 평가 지표를 요약한 내용입니다:</p>
+
+<p>RAG 모델 평가에는 <a href="https://arxiv.org/abs/2309.01431">RGB</a>, <a href="https://arxiv.org/abs/2311.08147">RECALL</a>과 같은 여러 벤치마크가 사용됩니다. 이와 함께,  <a href="https://arxiv.org/abs/2309.15217">RAGAS</a>와 <a href="https://arxiv.org/abs/2311.09476">ARES</a>, <a href="https://www.trulens.org/trulens_eval/core_concepts_rag_triad/">TruLens</a> 같은 다양한 도구들이 RAG 시스템 평가 과정을 자동화하기 위해 개발되었습니다. 이러한 시스템 중 일부는 앞서 정의된 품질 지표를 위해 LLM을 사용합니다.</p>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Frag-metrics.1ddc2a61.png&amp;w=1080&amp;q=75" alt="Untitled" /></p>
+
+<h2 id="rag의-도전과제와-미래"><strong>RAG의 도전과제와 미래</strong></h2>
+
+<p>RAG 시스템의 검색, 증강, 생성 능력을 향상시키기 위한 여러 접근 방법이 존재합니다. <a href="https://arxiv.org/abs/2312.10997">Gao et al., 2023</a> 에서 강조한 것처럼, RAG 시스템을 개발하고 개선하는 과정에는 다음과 같은 도전 과제가 있습니다:</p>
+
+<ul>
+  <li>컨텍스트 길이: LLM의 컨텍스트 윈도우 크기가 확장됨에 따라, RAG가 높은 관련성과 중요한 컨텍스트를 포착하기 위해 어떻게 적응해야 할지에 대한 과제가 있습니다.</li>
+  <li>견고성: 반사실적이고 적대적 정보를 처리하는 능력은 RAG에서 측정하고 개선해야 할 중요한 부분입니다.</li>
+  <li>하이브리드 접근법: RAG와 미세 조정된 모델을 어떻게 최적화하는지에 대해 더 잘 이해하기 위한 지속적인 연구가 필요합니다.</li>
+  <li>LLM 역할 확장: LLM의 역할과 능력을 증가시켜 RAG 시스템을 강화하는 것이 주목받고 있습니다.</li>
+  <li>스케일링 법칙: LLM의 스케일링 법칙이 RAG 시스템에 어떻게 적용되는지에 대한 연구는 여전히 초기 단계에 있습니다.</li>
+  <li>생산 준비된 RAG: 실제로 사용될 수 있는 RAG 시스템은 성능, 효율성, 데이터 보안, 개인 정보 보호 등 다양한 분야에서 뛰어난 엔지니어링 기술을 요구합니다.</li>
+  <li>다중 모달 RAG: RAG 시스템에 대한 많은 연구 노력이 있었지만, 대부분 텍스트 기반 작업을 중심으로 이루어졌습니다. 이미지, 오디오, 비디오, 코드 등과 같은 다양한 도메인에서 문제를 해결하기 위해 RAG 시스템의 모달리티를 확장하는 데에 대한 관심이 증가하고 있습니다.</li>
+  <li>평가: RAG를 사용한 복잡한 응용 프로그램 개발이 확대됨에 따라, 컨텍스트 관련성, 창의성, 콘텐츠 다양성, 사실성 등을 더 정확하게 평가할 수 있는 섬세한 메트릭과 평가 도구 개발에 주목이 집중되고 있습니다. 또한 RAG에 대한 해석 가능성 연구와 도구 개발의 필요성도 증가하고 있습니다.</li>
+</ul>
+
+<h2 id="rag-도구">RAG 도구</h2>
+
+<p>RAG 시스템을 구축하기 위한 인기 있는 도구들로는 <a href="https://www.langchain.com/">LangChain</a>, <a href="https://www.llamaindex.ai/">LlamaIndex</a>, <a href="https://github.com/stanfordnlp/dspy">DSPy</a>가 있습니다. 이와 함께 다양한 목적을 위한 도구도 존재합니다. 예를 들어 <a href="https://flowiseai.com/">Flowise AI</a>  코드를 거의 작성하지 않는, 사용이 간편한 솔루션을 제공하여 RAG 애플리케이션 구축을 용이하게 합니다. 다른 주목할 만한 기술로는 <a href="https://haystack.deepset.ai/">HayStack</a>, <a href="https://meltano.com/">Meltano</a>, <a href="https://cohere.com/coral">Cohere Coral</a> 등이 있습니다. 또한, 소프트웨어 및 클라우드 서비스 제공업체들도 RAG 중심 서비스를 제공하고 있습니다. 예를 들어, Weaviate의 Verba는 개인 비서 애플리케이션을 구축하는 데 유용하며, Amazon의 Kendra는 지능적인 비즈니스 검색 서비스를 제공합니다.</p>
+
+<h2 id="결론">결론</h2>
+
+<p>결론적으로, RAG 시스템은 더욱 고급화된 패러다임의 개발을 포함하여 급속하게 발전하고 있으며, 이는 다양한 분야에서 RAG의 성능과 유용성을 높이고 사용자 맞춤화를 가능하게 합니다. RAG 애플리케이션에 대한 엄청난 수요가 있으며, 이는 RAG 시스템의 다양한 구성 요소를 개선하기 위한 개발을 빠르게 하고 있습니다. 하이브리드 방법론에서 자체 검색에 이르기까지, 이것들은 현재 RAG 모델의 연구 분야 중 일부입니다. 마지막으로, 더 나은 평가 도구와 지표에 대한 수요도 증가하고 있습니다. 아래 그림은 지금까지 다룬 RAG 생태계, RAG 개선을 위한 기술, 도전 과제 및 기타 관련 측면을 요약한 것입니다.</p>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Frag-ecosystem.b7b7d408.png&amp;w=1080&amp;q=75" alt="Untitled" /></p>
+
+<h2 id="rag-연구-인사이트">RAG 연구 인사이트</h2>
+
+<p>아래에서 RAG의 주요 인사이트와 최신 개발 사항을 소개하는 연구 논문 모음을 확인할 수 있습니다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>인사이트</th>
+      <th>논문</th>
+      <th>날짜</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>RAG 시스템에서 생성의 견고성을 향상시키기 위해 Corrective Retrieval Augmented Generation(CRAG)을 제안합니다. 핵심 아이디어는 검색기를 위한 자기 수정 구성 요소를 구현하고 생성을 증강하기 위해 검색된 문서의 활용도를 개선하는 것입니다. 검색 평가기는 쿼리를 고려할 때 검색된 문서의 전반적인 품질을 평가하는 데 도움이 됩니다. 웹 검색 및 최적화된 지식 활용 작업을 사용하면 자동 자가 수정 및 검색된 문서의 효율적 활용을 개선할 수 있습니다.</td>
+      <td><a href="https://arxiv.org/abs/2401.15884">https://arxiv.org/abs/2401.15884</a></td>
+      <td>2024년 1월</td>
+    </tr>
+    <tr>
+      <td>텍스트 청크를 재귀적으로 임베딩, 클러스터링 및 요약하여 아래에서 위로 다양한 수준의 요약이 있는 트리를 구성합니다. 추론 시 제안된 RAPTOR 모델은 트리에서 검색하여 길이가 긴 문서에서 서로 다른 추상화 수준의 정보를 통합합니다.</td>
+      <td><a href="https://arxiv.org/abs/2401.18059">https://arxiv.org/abs/2401.18059</a></td>
+      <td>2024년 1월</td>
+    </tr>
+    <tr>
+      <td>다중 레이블 분류 문제를 효율적으로 해결하기 위한 LM과 검색기 간의 다단계 상호 작용이 있는 일반 프로그램입니다.</td>
+      <td><a href="https://arxiv.org/abs/2401.12178">https://arxiv.org/abs/2401.12178</a></td>
+      <td>2024년 1월</td>
+    </tr>
+    <tr>
+      <td>다양한 작업에 걸쳐 다국어 사전 학습 언어 모델의 제로샷 성능을 향상시키기 위해 리소스가 풍부한 언어에서 의미론적으로 유사한 프롬프트를 추출합니다.</td>
+      <td><a href="https://arxiv.org/abs/2311.06595">https://arxiv.org/abs/2311.06595</a></td>
+      <td>2023년 11월</td>
+    </tr>
+    <tr>
+      <td>노이즈가 많고 관련성이 낮은 문서에 직면하고 알 수 없는 시나리오를 처리할 때 RAG의 견고성을 개선합니다. 검색된 문서에 대한 순차적 독서 메모를 생성하여 주어진 질문과의 관련성을 철저히 평가하고 정보를 통합하여 최종 답변을 준비할 수 있습니다.</td>
+      <td><a href="https://arxiv.org/abs/2311.09210">https://arxiv.org/abs/2311.09210</a></td>
+      <td>2023년 11월</td>
+    </tr>
+    <tr>
+      <td>독자의 답변 생성 프로세스를 최적화하기 위해 필수 정보에 기여하지 않을 수 있는 토큰을 제거합니다. 실행 시간을 최대 62.2% 줄이고 성능은 2%만 감소합니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.13682">https://arxiv.org/abs/2310.13682</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>지식 증강 LM의 출력과 지식을 별도의 검증기로 확인하기 위해 작은 LM 검증기를 지침 튜닝합니다. 모델이 주어진 쿼리와 관련된 지식을 검색하지 못하거나 모델이 생성된 텍스트에서 검색된 지식을 충실하게 반영하지 못할 수 있는 시나리오를 해결하는 데 도움이 됩니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.12836">https://arxiv.org/abs/2310.12836</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>RAG에 필요한 노이즈 견고성, 부정 거부, 정보 통합 및 반사실적 견고성을 포함한 4가지 기본 능력에서 다양한 LLM의 성능을 분석하는 벤치마크입니다.</td>
+      <td><a href="https://arxiv.org/abs/2309.01431">https://arxiv.org/abs/2309.01431</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>검색 및 자기 성찰을 통해 LM의 품질과 사실성을 향상시키는 Self-Reflective Retrieval-Augmented Generation(Self-RAG) 프레임워크를 소개합니다. LM을 활용하여 단락을 적응적으로 검색하고 반사 토큰을 사용하여 검색된 단락과 자체 생성에 대해 생성하고 반영합니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.11511">https://arxiv.org/abs/2310.11511</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>생성 증강 검색(GAR)을 통해 검색을 반복적으로 개선하고 RAG를 통해 다시 쓰기를 개선하여 제로샷 정보 검색을 개선합니다. 다시 쓰기-검색 단계는 재현율을 개선하고 재순위화 단계는 정밀도를 개선합니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.20158">https://arxiv.org/abs/2310.20158</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>기본 43B GPT 모델을 사용하여 48B 검색 모델을 사전 학습하고 1.2조 토큰에서 검색합니다. 이 모델은 광범위한 제로샷 작업에서 지침 조정된 GPT보다 상당한 개선을 보여주기 위해 추가로 지침 조정됩니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.07713">https://arxiv.org/abs/2310.07713</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>두 가지 고유한 미세 조정 단계를 통해 검색 기능을 갖춘 LLM을 개조합니다. 하나는 사전 학습된 LM을 업데이트하여 검색된 정보를 더 잘 사용하고 다른 하나는 LM이 선호하는 대로 더 관련성 있는 결과를 반환하도록 검색기를 업데이트합니다. 지식 활용과 맥락 인식이 모두 필요한 작업에 대해 미세 조정함으로써 각 단계는 성능 향상을 가져옵니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.01352">https://arxiv.org/abs/2310.01352</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>RAG를 무관한 내용에 견고하게 만드는 방법입니다. 학습 시간에 관련 및 무관한 문맥을 혼합하여 사용하여 언어 모델을 미세 조정하여 검색된 단락을 적절히 활용하도록 자동으로 데이터를 생성합니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.01558">https://arxiv.org/abs/2310.01558</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>4K 컨텍스트 창이 있는 LLM은 긴 컨텍스트 작업에서 위치 보간을 통해 16K 컨텍스트 창으로 미세 조정된 LLM과 비교할 만한 성능을 달성하기 위해 생성 시 단순한 검색 증강을 사용한다는 것을 발견했습니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.03025">https://arxiv.org/abs/2310.03025</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>문맥 내 통합 전에 검색된 문서를 텍스트 요약으로 압축하여 계산 비용을 줄이고 LM이 긴 검색 문서에서 관련 정보를 식별해야 하는 부담을 덜어줍니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.04408">https://arxiv.org/abs/2310.04408</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>매개변수 및 비매개변수 지식을 모두 활용하고 검색-생성 상호 작용을 통해 올바른 추론 경로를 찾는 데 도움이 되는 반복적 검색-생성 협업 프레임워크입니다. 다단계 추론이 필요한 작업에 유용하며 전반적으로 LLM의 추론 능력을 향상시킵니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.05149">https://arxiv.org/abs/2310.05149</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>모호한 질문에 대한 모호성 해소 트리를 재귀적으로 구성하는 Tree of Clarifications(ToC) 프레임워크를 제안합니다. 그런 다음 트리를 사용하여 긴 양식의 답변을 생성합니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.14696">https://arxiv.org/abs/2310.14696</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>LLM이 이전에 접했던 질문을 참조하고 새로운 질문을 만났을 때 적응적으로 외부 리소스를 요청할 수 있게 하는 접근 방식입니다.</td>
+      <td><a href="https://arxiv.org/abs/2310.05002">https://arxiv.org/abs/2310.05002</a></td>
+      <td>2023년 10월</td>
+    </tr>
+    <tr>
+      <td>사람의 주석에 의존하지 않고도 다양한 차원(즉, 관련 및 집중된 문맥 단락을 식별하는 검색 시스템의 능력, 그러한 단락을 충실하게 활용하는 LLM의 능력 또는 생성 자체의 품질)을 평가하는 데 사용할 수 있는 일련의 메트릭입니다.</td>
+      <td><a href="https://arxiv.org/abs/2309.15217">https://arxiv.org/abs/2309.15217</a></td>
+      <td>2023년 9월</td>
+    </tr>
+    <tr>
+      <td>대형 언어 모델을 먼저 프롬프트하여 주어진 질문을 기반으로 문맥 문서를 생성한 다음 생성된 문서를 읽어 최종 답변을 생성하는 generate-then-read(GenRead) 방법을 제안합니다.</td>
+      <td><a href="https://arxiv.org/abs/2209.10063">https://arxiv.org/abs/2209.10063</a></td>
+      <td>2023년 9월</td>
+    </tr>
+    <tr>
+      <td>DiversityRanker 및 LostInTheMiddleRanker와 같은 랭커가 RAG 시스템에서 LLM 컨텍스트 창 활용을 최적화하는 정보를 선택하고 활용하는 데 어떻게 사용될 수 있는지 보여줍니다.</td>
+      <td><a href="https://towardsdatascience.com/enhancing-rag-pipelines-in-haystack-45f14e2bc9f5">https://towardsdatascience.com/enhancing-rag-pipelines-in-haystack-45f14e2bc9f5</a></td>
+      <td>2023년 8월</td>
+    </tr>
+    <tr>
+      <td>LLM을 다양한 지식 베이스(KB)와 연결하여 지식의 검색과 저장을 모두 용이하게 합니다. 검색 프로세스는 KB 작업을 위한 미리 정의된 함수로 코드 형식으로 KB에 대한 검색 언어를 생성하는 사고 프롬프팅 프로그램을 사용합니다. 또한 개별 사용자 요구 사항에 맞게 개인화된 KB에 지식을 저장할 수 있는 기능을 제공합니다.</td>
+      <td><a href="https://arxiv.org/abs/2308.11761">https://arxiv.org/abs/2308.11761</a></td>
+      <td>2023년 8월</td>
+    </tr>
+    <tr>
+      <td>검색 증강 마스크 언어 모델링과 접두사 언어 모델링을 결합한 모델을 제안합니다. 그런 다음 추가 교육 없이도 모델이 더 많은 문맥 내 예제를 활용할 수 있도록 하여 몇 샷 성능을 향상시키는 Fusion-in-Context Learning을 도입합니다.</td>
+      <td><a href="https://arxiv.org/abs/2308.07922">https://arxiv.org/abs/2308.07922</a></td>
+      <td>2023년 8월</td>
+    </tr>
+    <tr>
+      <td>RaLLe은 지식 집약적 작업을 위한 RAG 시스템을 개발, 평가 및 최적화하기 위한 오픈 소스 프레임워크입니다.</td>
+      <td><a href="https://arxiv.org/abs/2308.10633">https://arxiv.org/abs/2308.10633</a></td>
+      <td>2023년 8월</td>
+    </tr>
+    <tr>
+      <td>LLM의 성능은 관련 정보의 위치를 변경할 때 크게 저하될 수 있으며, 이는 LLM이 긴 입력 컨텍스트의 정보를 강건하게 활용하지 않는다는 것을 나타냅니다.</td>
+      <td><a href="https://arxiv.org/abs/2307.03172">https://arxiv.org/abs/2307.03172</a></td>
+      <td>2023년 7월</td>
+    </tr>
+    <tr>
+      <td>작업 지향적 방식으로 검색과 생성을 시너지 효과적으로 결합합니다. 모델 출력은 작업을 완료하는 데 필요한 사항을 보여주는 데 사용되며, 다음 반복에서 더 나은 출력을 생성하는 데 도움이 되는 보다 관련성 있는 지식을 검색하기 위한 유용한 맥락을 제공합니다.</td>
+      <td><a href="https://arxiv.org/abs/2305.15294">https://arxiv.org/abs/2305.15294</a></td>
+      <td>2023년 5월</td>
+    </tr>
+    <tr>
+      <td>생성 과정에서 언제 무엇을 검색할지 능동적으로 결정하는 방법인 능동 RAG의 일반화된 관점을 제공합니다. 그런 다음 예측된 다음 문장을 반복적으로 사용하여 미래 내용을 예측하는 Forward-Looking Active REtrieval augmented generation(FLARE) 방법을 제안합니다. 이는 관련 문서를 검색하는 데 사용되는 쿼리로 활용되어 신뢰도가 낮은 토큰이 포함된 경우 문장을 재생성합니다.</td>
+      <td><a href="https://arxiv.org/abs/2305.06983">https://arxiv.org/abs/2305.06983</a></td>
+      <td>2023년 5월</td>
+    </tr>
+    <tr>
+      <td>사전에 알 수 없거나 공동으로 미세 조정할 수 없는 대상 LM을 향상시키기 위해 일반 검색기를 활용하는 일반 검색 플러그인을 소개합니다.</td>
+      <td><a href="https://arxiv.org/abs/2305.17331">https://arxiv.org/abs/2305.17331</a></td>
+      <td>2023년 5월</td>
+    </tr>
+    <tr>
+      <td>두 가지 사전 학습 전략을 통해 구조화된 데이터에 대한 밀집 검색을 개선합니다. 첫째, 구조화된 데이터와 구조화되지 않은 데이터 간의 자연스러운 정렬을 활용하여 구조 인식 사전 학습을 수행합니다. 그런 다음 마스크된 엔티티 예측 및 구조적 의미 캡처를 위해 Masked Entity Prediction을 구현합니다.</td>
+      <td><a href="https://arxiv.org/abs/2305.19912">https://arxiv.org/abs/2305.19912</a></td>
+      <td>2023년 5월</td>
+    </tr>
+    <tr>
+      <td>LLM의 사실적 정확성을 높이기 위해 여러 도메인의 이질적 출처에서 근거 정보를 동적으로 통합합니다. 서로 다른 지식 출처에 맞춰진 쿼리를 처리하기 위해 적응형 쿼리 생성기를 도입합니다. 이 프레임워크는 선행 근거에서 부정확성이 후속 단계로 전파되지 않도록 근거를 점진적으로 수정합니다.</td>
+      <td><a href="https://arxiv.org/abs/2305.13269">https://arxiv.org/abs/2305.13269</a></td>
+      <td>2023년 5월</td>
+    </tr>
+    <tr>
+      <td>지식 그래프(KG)를 사용하여 문맥 관련성이 높고 지식 기반의 대화를 생성하는 프레임워크입니다. 먼저 KG에서 관련 하위 그래프를 검색한 다음 검색된 하위 그래프에 의해 조건화된 단어 임베딩을 교란시켜 사실 간의 일관성을 시행합니다. 그런 다음 생성된 텍스트가 검색된 하위 그래프와 높은 유사성을 갖도록 대조 학습을 활용합니다.</td>
+      <td><a href="https://arxiv.org/abs/2305.18846">https://arxiv.org/abs/2305.18846</a></td>
+      <td>2023년 5월</td>
+    </tr>
+    <tr>
+      <td>블랙박스 LLM 리더에 맞게 조정하기 위해 작은 언어 모델을 학습 가능한 재작성기로 채택합니다. 재작성기는 RL에 의해 LLM 리더의 피드백을 사용하여 학습됩니다. 쿼리 최적화에 중점을 둔 새로운 프레임워크인 Rewrite-Retrieve-Read를 만듭니다.</td>
+      <td><a href="https://arxiv.org/abs/2305.14283">https://arxiv.org/abs/2305.14283</a></td>
+      <td>2023년 5월</td>
+    </tr>
+    <tr>
+      <td>반복적으로 검색 증강 생성기를 사용하여 무제한 메모리 풀을 만들고 메모리 선택기를 사용하여 후속 생성 라운드의 메모리로 하나의 출력을 선택합니다. 이를 통해 모델은 자체 메모리라고 하는 자체 출력을 활용하여 생성을 개선할 수 있습니다.</td>
+      <td><a href="https://arxiv.org/abs/2305.02437">https://arxiv.org/abs/2305.02437</a></td>
+      <td>2023년 5월</td>
+    </tr>
+    <tr>
+      <td>매개변수를 변경하지 않고 관련 지식에 액세스할 수 있도록 LLM에 지식 안내 모듈을 장착합니다. 사실적(+7.9%), 테이블(+11.9%), 의료(+3.0%) 및 다중 모달(+8.1%) 지식이 필요한 다양한 도메인 지식 집약적 작업에서 “블랙박스” LLM의 성능을 개선합니다.</td>
+      <td><a href="https://arxiv.org/abs/2305.04757">https://arxiv.org/abs/2305.04757</a></td>
+      <td>2023년 5월</td>
+    </tr>
+    <tr>
+      <td>LLM에 일반 쓰기-읽기 메모리 유닛을 장착하여 작업 수행에 필요에 따라 텍스트에서 지식을 추출, 저장 및 회상할 수 있도록 합니다.</td>
+      <td><a href="https://arxiv.org/abs/2305.14322">https://arxiv.org/abs/2305.14322</a></td>
+      <td>2023년 5월</td>
+    </tr>
+    <tr>
+      <td>공유 정적 인덱스를 구축하고 후보 증거를 효율적으로 선택하기 위해 작업 불가지론적 검색기를 채택합니다. 그런 다음 리더를 위한 작업별 관련성에 따라 가장 가까운 증거의 순위를 재조정하기 위한 프롬프트 안내 재조정기를 설계합니다.</td>
+      <td><a href="https://arxiv.org/abs/2305.17653">https://arxiv.org/abs/2305.17653</a></td>
+      <td>2023년 5월</td>
+    </tr>
+    <tr>
+      <td>주어진 제로샷 작업 입력에 대한 프롬프트를 자동으로 검색하는 가벼우면서도 다재다능한 검색기를 튜닝하는 UPRISE(Universal Prompt Retrieval for Improving zero-Shot Evaluation)를 제안합니다.</td>
+      <td><a href="https://arxiv.org/abs/2303.08518">https://arxiv.org/abs/2303.08518</a></td>
+      <td>2023년 3월</td>
+    </tr>
+    <tr>
+      <td>SLM(필터 역할)과 LLM(재순위 지정 역할)의 강점을 결합하는 적응형 필터 후 재순위 지정 패러다임입니다.</td>
+      <td><a href="https://arxiv.org/abs/2303.08559">https://arxiv.org/abs/2303.08559</a></td>
+      <td>2023년 3월</td>
+    </tr>
+    <tr>
+      <td>지시를 따르는 LLM을 제로샷 방식으로 지시하여 관련성 패턴을 캡처하는 가설적 문서를 생성합니다. 그런 다음 Contriever는 문서를 임베딩 벡터로 인코딩하여 코퍼스 임베딩 공간에서 이웃을 식별하는 데 사용되며, 여기서 벡터 유사성을 기반으로 유사한 실제 문서가 검색됩니다.</td>
+      <td><a href="https://arxiv.org/abs/2212.10496">https://arxiv.org/abs/2212.10496</a></td>
+      <td>2022년 12월</td>
+    </tr>
+    <tr>
+      <td>파이프라인 인식 데모를 부트스트랩하고 관련 구절을 검색하며 근거 있는 예측을 생성하는 고급 프로그램을 작성하는 Demonstrate-Search-Predict(DSP) 프레임워크를 제안하여, 보다 안정적으로 처리할 수 있는 작은 변환으로 문제를 체계적으로 분해합니다.</td>
+      <td><a href="https://arxiv.org/abs/2212.14024">https://arxiv.org/abs/2212.14024</a></td>
+      <td>2022년 12월</td>
+    </tr>
+    <tr>
+      <td>검색을 CoT로 안내하고 검색 결과를 사용하여 CoT를 개선하여 검색과 CoT 단계를 교차하는 다단계 QA 접근 방식입니다. 이는 지식 집약적인 다단계 질문에 대한 성능을 향상시키는 데 도움이 됩니다.</td>
+      <td><a href="https://arxiv.org/abs/2212.10509">https://arxiv.org/abs/2212.10509</a></td>
+      <td>2022년 12월</td>
+    </tr>
+    <tr>
+      <td>검색 증강이 관련 사전 학습 정보에 대한 의존도를 줄일 수 있음을 보여주며, 이는 RAG를 롱테일 캡처를 위한 유망한 접근 방식으로 만듭니다.</td>
+      <td><a href="https://arxiv.org/abs/2211.08411">https://arxiv.org/abs/2211.08411</a></td>
+      <td>2022년 11월</td>
+    </tr>
+    <tr>
+      <td>샘플링을 통해 LLM 자체 메모리에서 하나 또는 여러 개의 관련 구절을 암송한 다음 최종 답변을 생성합니다.</td>
+      <td><a href="https://arxiv.org/abs/2210.01296">https://arxiv.org/abs/2210.01296</a></td>
+      <td>2022년 10월</td>
+    </tr>
+    <tr>
+      <td>LLM을 몇 개의 샷 쿼리 생성기로 활용하고 생성된 데이터를 기반으로 작업별 검색기를 만듭니다.</td>
+      <td><a href="https://arxiv.org/abs/2209.11755">https://arxiv.org/abs/2209.11755</a></td>
+      <td>2022년 9월</td>
+    </tr>
+    <tr>
+      <td>Atlas를 제시하는데, 이는 매우 적은 수의 학습 예제로 지식 집약적 작업을 학습할 수 있는 사전 학습된 검색 증강 언어 모델입니다.</td>
+      <td><a href="https://arxiv.org/abs/2208.03299">https://arxiv.org/abs/2208.03299</a></td>
+      <td>2022년 8월</td>
+    </tr>
+    <tr>
+      <td>학습 데이터에서 검색하여 다양한 NLG 및 NLU 작업에서 성과를 올립니다.</td>
+      <td><a href="https://arxiv.org/abs/2203.08773">https://arxiv.org/abs/2203.08773</a></td>
+      <td>2022년 3월</td>
+    </tr>
+    <tr>
+      <td>연속적인 데이터 저장소 항목 간의 포인터를 저장하고 해당 항목을 상태로 클러스터링하여 데이터 저장소 검색을 근사합니다. 추론 시 kNN-LM에 비해 퍼플렉서티를 해치지 않으면서 최근접 이웃 검색기의 최대 83%를 절약할 수 있는 가중 유한 오토마톤이 만들어집니다.</td>
+      <td><a href="https://arxiv.org/abs/2201.12431">https://arxiv.org/abs/2201.12431</a></td>
+      <td>2022년 1월</td>
+    </tr>
+    <tr>
+      <td>대규모 코퍼스에서 검색된 문서 청크에 조건화하여 자기 회귀 언어 모델을 개선하며, 이는 선행 토큰과의 로컬 유사성을 기반으로 합니다. 2조 토큰 데이터베이스에서 검색하여 모델을 향상시킵니다.</td>
+      <td><a href="https://arxiv.org/abs/2112.04426">https://arxiv.org/abs/2112.04426</a></td>
+      <td>2021년 12월</td>
+    </tr>
+    <tr>
+      <td>하드 네거티브와 강건한 학습 절차를 이용하여 밀집 패시지 검색을 확장함으로써 제로샷 슬롯 필링에 대한 새로운 접근 방식을 제안합니다.</td>
+      <td><a href="https://arxiv.org/abs/2108.13934">https://arxiv.org/abs/2108.13934</a></td>
+      <td>2021년 8월</td>
+    </tr>
+    <tr>
+      <td>매개변수 메모리가 사전 학습된 seq2seq 모델이고 비매개변수 메모리가 사전 학습된 신경 검색기로 액세스되는 Wikipedia의 밀집 벡터 인덱스인 RAG 모델을 소개합니다. 생성된 전체 시퀀스에 걸쳐 동일한 검색된 패시지에 조건화하는 RAG 공식과 토큰마다 다른 패시지를 사용하는 RAG 공식, 두 가지를 비교합니다.</td>
+      <td><a href="https://arxiv.org/abs/2005.11401">https://arxiv.org/abs/2005.11401</a></td>
+      <td>2020년 5월</td>
+    </tr>
+    <tr>
+      <td>작은 수의 질문과 패시지에서 간단한 이중 인코더 프레임워크에 의해 임베딩이 학습되는 밀집 표현만을 사용하여 검색을 구현할 수 있음을 보여줍니다.</td>
+      <td><a href="https://arxiv.org/abs/2004.04906">https://arxiv.org/abs/2004.04906</a></td>
+      <td>2020년 4월</td>
+    </tr>
+  </tbody>
+</table>]]></content><author><name>Harheem Kim</name></author><category term="LLM" /><summary type="html"><![CDATA[Retrieval Augmented Generation (RAG) for LLMs]]></summary></entry><entry><title type="html">LLM Agents</title><link href="http://localhost:4000/llm/2024/02/28/llm-agents.html" rel="alternate" type="text/html" title="LLM Agents" /><published>2024-02-28T14:51:21+09:00</published><updated>2024-02-28T14:51:21+09:00</updated><id>http://localhost:4000/llm/2024/02/28/llm-agents</id><content type="html" xml:base="http://localhost:4000/llm/2024/02/28/llm-agents.html"><![CDATA[<h1 id="llm-agents">LLM Agents</h1>
+
+<p><a href="https://www.promptingguide.ai/kr/research/llm-agents">LLM Agents – Nextra</a></p>
+
+<p><a href="https://github.com/dair-ai/Prompt-Engineering-Guide/pull/406#event-11954600373">Translate llm-agents.en.mdx to Korean in llm-agents.kr.mdx by harheem · Pull Request #406 · dair-ai/Prompt-Engineering-Guide</a></p>
+
+<p>LLM 기반 에이전트는 계획 및 메모리와 같은 핵심 모듈과 결합된 LLM을 통해 복잡한 작업을 수행할 수 있는 LLM 애플리케이션을 의미합니다. 여기서 LLM은 작업이나 사용자 요청을 완료하는 데 필요한 작업 흐름을 제어하는 주요 컨트롤러 또는 ‘두뇌’ 역할을 합니다. LLM 에이전트는 계획, 메모리, 도구와 같은 다양한 핵심 모듈이 필요할 수 있습니다.</p>
+
+<p>이 LLM 에이전트의 유용성을 더 잘 이해하기 위해, 다음과 같은 시스템을 구축하는 데 관심이 있다고 생각해 보겠습니다:</p>
+
+<blockquote>
+  <p>2023년 미국의 평균 일일 칼로리 섭취량은 얼마인가요?</p>
+
+</blockquote>
+
+<p>위 질문은 이미 충분한 지식을 갖춘 LLM을 통해 바로 답할 수 있을 것입니다. 만약 LLM이 해당 질문에 대한 지식이 없다면, LLM은 건강 관련 정보나 보고서에 접근할 수 있는 간단한 RAG 시스템을 활용할 수 있습니다. 이제 보다 복잡한 질문을 시도해 보겠습니다:</p>
+
+<blockquote>
+  <p>지난 10년 동안 미국 성인의 평균 일일 칼로리 섭취 추세는 어떻게 변했으며, 이것이 비만률에 어떤 영향을 미쳤나요? 또한, 이 기간 동안 비만률 추세의 그래픽 표현을 제공할 수 있나요?</p>
+
+</blockquote>
+
+<p>이 질문에 대답하기 위해서는 단순히 LLM만 사용하는 것으로는 충분하지 않습니다. LLM을 외부 지식 베이스와 결합한 RAG 시스템을 만드는 것도 이런 복잡한 질문에 대한 답변을 제공하기엔 부족할 수 있습니다. 이런 질문에 대응하기 위해서는 LLM이 필요한 도구를 활용하고, 목표로 하는 최종 응답을 위한 작업 흐름을 관리하며, 작업을 세분화하는 과정이 필요합니다. 한 가지 해결책으로는 LLM 에이전트를 구축하여 검색 API, 건강 관련 출판물, 칼로리 섭취 및 비만과 관련된 정보를 제공하는 공공 및 사적 건강 데이터베이스에 접근할 수 있도록 하는 것입니다.</p>
+
+<p>LLM은 비만 추세를 분석하는 데 도움이 되는 차트를 생성하기 위해 데이터를 처리하는 코드 인터프리터 도구에 접근해야 할 것입니다. 이러한 도구는 LLM 에이전트가 고려할 수 있는 고급 기능 중 하나입니다. 또한, 작업 계획을 세우고 작업 흐름을 관리하며, 진행 상황을 추적하는 데 유용한 메모리 모듈에 대한 접근도 중요한 고려 사항 중 하나입니다.</p>
+
+<h1 id="llm-에이전트-프레임워크">LLM 에이전트 프레임워크</h1>
+
+<hr />
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fagent-framework.ad7f5098.png&amp;w=1080&amp;q=75" alt="image" /></p>
+
+<p>일반적으로 LLM 에이전트 프레임워크는 다음과 같은 핵심 구성 요소로 이루어질 수 있습니다:</p>
+
+<ul>
+  <li>사용자 요청(User Request) - 사용자의 질문이나 요청</li>
+  <li>에이전트(Agent)/두뇌(Brain) - 관리자의 역할을 하는 에이전트의 핵심</li>
+  <li>계획(Planning) - 에이전트가 미래 행동을 계획하는 것을 도움</li>
+  <li>메모리(Memory) - 에이전트의 과거 행동을 관리</li>
+</ul>
+
+<h2 id="에이전트">에이전트</h2>
+
+<p>대규모 언어 모델(LLM)은 시스템의 핵심 두뇌로서, 에이전트 모듈이나 관리자의 역할을 수행합니다. 이 구성 요소는 에이전트의 작동 방식과 접근 가능한 도구(도구의 세부 정보 포함)에 대한 중요한 세부 정보를 담은 프롬프트 템플릿을 통해 활성화됩니다.</p>
+
+<p>필수는 아니지만, 에이전트는 특정 역할이나 특성을 가진 페르소나로 프로파일링될 수 있습니다. 이 프로파일링 정보는 주로 프롬프트에 기재되며, 역할 세부 정보, 성격, 사회적 배경, 인구 통계적 정보 등 구체적인 사항을 포함할 수 있습니다. <a href="https://arxiv.org/pdf/2308.11432.pdf">Wang et al. 2023</a>에 따르면, 에이전트 프로파일을 정의하는 방법으로는 수작업, LLM 생성, 데이터 기반 접근법이 있습니다.</p>
+
+<h2 id="계획">계획</h2>
+
+<h3 id="피드백이-없는-계획">피드백이 없는 계획</h3>
+
+<p>계획 모듈은 에이전트가 사용자의 요청에 답하기 위해 해결해야 할 단계나 하위 작업들을 세분화하는 데 도움을 줍니다. 이러한 단계는 에이전트가 문제를 더 효과적으로 추론하고 신뢰할 수 있는 해결책을 찾는 데 필요합니다. 계획 모듈은 LLM을 이용하여 사용자의 질문에 도움이 되는 하위 작업을 포함한 상세한 계획을 만듭니다. 작업 분해에 사용되는 인기 있는 기술로는 <a href="https://www.promptingguide.ai/techniques/cot">Chain of Thought</a>와  <a href="https://www.promptingguide.ai/techniques/tot">Tree of Thoughts</a>가 있으며, 이는 단일 경로 추론과 다중 경로 추론으로 구분될 수 있습니다.  아래는 <a href="https://arxiv.org/abs/2308.11432">Wang et al. 2023</a>에서 다양한 전략을 비교한 그림입니다:</p>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ftask-decomposition.f7e3d2f9.png&amp;w=1200&amp;q=75" alt="Untitled" /></p>
+
+<h3 id="피드백이-있는-계획">피드백이 있는 계획</h3>
+
+<p>위에서 언급한 계획 모듈들은 피드백이 없어 복잡한 작업에 대한 장기적인 계획을 세우는 데 어려움을 겪습니다. 이 문제를 해결하기 위해, 모델이 과거 행동과 관찰을 바탕으로 실행 계획을 반복적으로 평가하고 조정하는 메커니즘을 사용할 수 있습니다. 목표는 과거의 실수를 수정하고 개선하여 최종 결과의 질을 높이는 것입니다. 이는 특히 복잡한 실제 환경 및 작업에서 시행착오가 중요한 역할을 할 때 중요합니다. 이런 메커니즘을 위한 두 가지 인기 있는 방법에는 <a href="https://www.promptingguide.ai/techniques/react">ReAct</a>와 <a href="https://arxiv.org/abs/2303.11366">Reflexion</a>이 있습니다.</p>
+
+<p>ReAct는 추론과 행동을 결합하여 LLM이 여러 단계(반복적으로 N회 실행)를 번갈아 가면서 복잡한 작업을 해결할 수 있도록 합니다. 이 단계들은 <code class="language-plaintext highlighter-rouge">생각</code>, <code class="language-plaintext highlighter-rouge">행동</code>, <code class="language-plaintext highlighter-rouge">관찰</code>로 구성됩니다. ReAct는 환경으로부터 관찰 형태의 피드백을 받습니다. 다른 유형의 피드백으로는 인간과 모델 피드백이 포함될 수 있습니다. 아래 그림은 ReAct의 예시와 질문에 답하는 데 관련된 다양한 단계들을 보여줍니다:</p>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Freact.8e7c93ae.png&amp;w=828&amp;q=75" alt="Untitled" /></p>
+
+<p>ReAct에 대해서 더 자세히 알고 싶다면 아래 문서를 참고하세요:</p>
+
+<p><a href="https://www.promptingguide.ai/techniques/react">https://www.promptingguide.ai/techniques/react</a></p>
+
+<h2 id="메모리">메모리</h2>
+
+<p>메모리 모듈은 에이전트와 사용자 간의 모든 상호작용, 환경에서의 과거 생각, 행동 및 관찰을 포함하는 에이전트의 내부 로그를 저장하는 데 도움을 줍니다. LLM 에이전트 관련 문헌에서 언급되는 주요 메모리 유형은 다음과 같습니다:</p>
+
+<ul>
+  <li><strong>단기 기억(Short-term memory)</strong> - 에이전트의 현재 상황에 대한 컨텍스트 정보를 포함합니다. 이는 대체로 컨텍스트 윈도우의 제한으로 인해 짧고 유한한 문맥 내 학습으로 구현됩니다.</li>
+  <li>장기 기억(<strong>Long-term memory)</strong> - 에이전트의 과거 행동과 생각을 장기간 보존하고 회상해야 하는 내용을 포함합니다. 이는 에이전트가 필요에 따라 관련 정보를 빠르고 확장 가능한 검색을 통해 접근하는 외부 벡터 저장소를 사용하는 경우가 많습니다.</li>
+</ul>
+
+<p>하이브리드 메모리는 단기 기억과 장기 기억을 통합하여 에이전트의 장기적 추론 능력과 경험 축적 능력을 강화합니다.</p>
+
+<p>에이전트를 구축할 때 고려할 수 있는 다양한 메모리 형식도 있습니다. 여기에는 자연 언어, 임베딩, 데이터베이스, 구조화된 리스트 등이 포함되며, 이들은 자연 언어로 표현된 키와 임베딩 벡터로 표현된 값으로 구성된 키-값 구조를 활용하는 Minecraft의 Ghost (<a href="https://arxiv.org/abs/2305.17144">GITM</a>)와 같이 결합될 수 있습니다.</p>
+
+<p>계획 및 메모리 모듈은 에이전트가 동적 환경에서 효과적으로 작동하고 과거 행동을 잘 회상하며 미래 행동을 계획할 수 있도록 합니다.</p>
+
+<h2 id="도구">도구</h2>
+
+<p>도구는 LLM 에이전트가 외부 환경과 상호 작용하는 데 도움을 주는 도구나 도구 집합을 의미합니다. 여기에는 위키피디아 검색 API, 코드 인터프리터, 수학 엔진 등이 포함됩니다. 또한, 데이터베이스, 지식 베이스, 외부 모델도 도구에 포함될 수 있습니다. 에이전트가 외부 도구와 상호작용할 때는 사용자 요청을 충족시키고 부분 작업을 완료하기 위해 필요한 관찰이나 정보를 얻는 워크플로우를 통해 작업을 수행합니다. 예를 들어, 건강 관련 질문에서 코드 인터프리터는 사용자가 요청한 필요한 차트 정보를 생성하는 코드를 실행하는 도구가 됩니다.</p>
+
+<p>LLM은 다양한 방식으로 도구를 활용합니다:</p>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2205.00445">MRKL</a>은 LLM과 전문가 모듈을 결합한 프레임워크로, 이는 LLM 또는 기호식(계산기 또는 날씨 API 등)일 수 있습니다.</li>
+  <li><a href="https://arxiv.org/abs/2302.04761">Toolformer</a>는 외부 도구 API 사용을 위해 LLM을 미세 조정합니다.</li>
+  <li><a href="https://www.promptingguide.ai/applications/function_calling">Function Calling</a>은 도구 API 집합을 정의하고 이를 모델에 요청의 일부로 제공함으로써 LLM에 도구 사용 기능을 추가합니다.</li>
+  <li><a href="https://arxiv.org/abs/2303.17580">HuggingGPT</a>는 다양한 기존 AI 모델을 연결하여 AI 작업을 해결하는 LLM 기반 에이전트로, LLM을 작업 계획자로 활용합니다.</li>
+</ul>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fhugginggpt.0559fbac.png&amp;w=1080&amp;q=75" alt="Untitled" /></p>
+
+<h1 id="llm-에이전트-응용-사례">LLM 에이전트 응용 사례</h1>
+
+<hr />
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fchemcrow.cec3da96.png&amp;w=1080&amp;q=75" alt="Untitled" /></p>
+
+<p><em>ChemCrow 에이전트는 유기 합성, 약물 발견 및 재료 설계를 포함한 작업을 완료하기 위해 설계되었음. 그림 출처: Bran et al., 2023</em></p>
+
+<p>복잡한 추론 및 상식 이해 능력 덕분에 LLM 기반 에이전트가 효과적으로 사용된 다양한 분야와 사례 연구를 강조합니다.</p>
+
+<h3 id="주목할-만한-llm-에이전트-사례">주목할 만한 LLM 에이전트 사례</h3>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2307.15810">Ma et al. (2023)</a>에서 정신 건강 지원을 위한 대화형 에이전트의 효과를 분석했는데, 이 에이전트는 사용자가 불안을 다루는 데 도움을 줄 수 있지만, 때때로 해로운 내용을 생성할 수 있다는 것을 발견했습니다.</li>
+  <li><a href="https://arxiv.org/abs/2301.07543">Horton (2023)</a>에서 시뮬레이션 시나리오에서 인간의 경제 행동을 탐구하기 위해 LLM 기반 에이전트에 소유권, 선호도, 성격을 부여하는 연구를 진행했습니다.</li>
+  <li><a href="https://arxiv.org/abs/2304.03442">Generative Agents</a>와 <a href="https://arxiv.org/abs/2308.04026">AgentSims</a>는 가상 마을에서 인간의 일상 생활을 시뮬레이션하기 위해 여러 에이전트를 사용하는 프로젝트입니다.</li>
+  <li><a href="https://arxiv.org/abs/2301.05327">Blind Judgement</a>는 여러 언어 모델을 활용해 다양한 판사들의 의사결정 과정을 시뮬레이션하며, 실제 대법원의 판결을 무작위 예측보다 더 정확하게 예측합니다.</li>
+  <li><a href="https://arxiv.org/abs/2305.03514">Ziems et al. (2023)</a>은 요약 생성, 스크립팅, 키워드 추출과 같은 작업에서 연구자를 보조하는 에이전트를 개발했습니다.</li>
+  <li><a href="https://arxiv.org/abs/2304.05376">ChemCrow</a>는 화학 관련 데이터베이스를 활용하여 해충 방제제, 세 가지 유기촉매 및 새로운 발색체의 발견을 독립적으로 계획하고 실행하는 LLM 화학 에이전트입니다.</li>
+  <li>[Boiko 등(2023)]은 과학 실험의 설계, 계획 및 실행을 자동화하기 위해 여러 LLM을 결합한 연구를 진행했습니다.</li>
+  <li>Math Agents는 수학 문제를 탐색, 발견, 해결 및 증명하는 데 연구자를 지원합니다. <a href="https://arxiv.org/abs/2308.02773">EduChat</a> 및 <a href="https://arxiv.org/abs/2308.06921">CodeHelp</a>는 교육 목적으로 설계된 주목할 만한 LLM 에이전트입니다.</li>
+  <li><a href="https://arxiv.org/abs/2304.10750">Mehta et al. (2023)</a>은 인간 건축가들이 AI 에이전트와 상호 작용하여 3D 시뮬레이션 환경에서 구조물을 구축할 수 있는 상호 작용형 프레임워크를 제안했습니다.</li>
+  <li><a href="https://arxiv.org/abs/2307.07924">ChatDev</a>, <a href="https://arxiv.org/abs/2307.16789">ToolLLM</a>, <a href="https://arxiv.org/abs/2308.00352">MetaGPT</a>는 코딩, 디버깅, 테스팅을 자동화하고 기타 소프트웨어 엔지니어링 작업을 지원하는 데 AI 에이전트의 가능성을 보여주는 연구입니다.</li>
+  <li><a href="https://arxiv.org/abs/2308.05481">D-Bot</a>은 데이터베이스 유지 관리 경험을 지속적으로 학습하는 LLM 기반 데이터베이스 관리자로, 데이터베이스에 대한 진단 및 최적화 조언을 제공합니다.</li>
+  <li><a href="https://arxiv.org/abs/2304.14354">IELLM</a>은 석유 및 가스 산업의 도전 과제를 해결하기 위해 LLM을 적용한 사례입니다.</li>
+  <li><a href="https://arxiv.org/abs/2302.00763">Dasgupta 등 2023</a>은 실체화된 추론 및 작업 계획을 위한 통합 에이전트 시스템을 제안했습니다.</li>
+  <li><a href="https://arxiv.org/abs/2402.07456">OS-Copilot</a>은 운영 시스템(OS)의 여러 요소들과 웹, 코드 터미널, 파일, 멀티미디어 및 다양한 타사 애플리케이션과의 인터페이스를 구축할 수 있는 범용 에이전트 프레임워크입니다.</li>
+</ul>
+
+<h2 id="llm-에이전트-도구">LLM 에이전트 도구</h2>
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fautogen.3894af4a.png&amp;w=1920&amp;q=75" alt="Untitled" /></p>
+
+<p><em>AutoGen 능력; 그림 출처: <a href="https://microsoft.github.io/autogen">https://microsoft.github.io/autogen</a></em></p>
+
+<p>LLM 에이전트를 구축하는 데 사용되는 주요 도구 및 프레임워크는 다음과 같습니다:</p>
+
+<ul>
+  <li><a href="https://python.langchain.com/docs/get_started/introduction">LangChain</a>: 언어 모델을 기반으로 한 애플리케이션 및 에이전트 개발을 위한 프레임워크입니다.</li>
+  <li><a href="https://github.com/Significant-Gravitas/AutoGPT">AutoGPT</a>: AI 에이전트를 구축하기 위한 다양한 도구를 제공합니다.</li>
+  <li><a href="https://github.com/langroid/langroid">Langroid</a>: 다중 에이전트 프로그래밍을 통해 LLM 애플리케이션 구축을 간소화합니다. 이는 메시지를 통한 에이전트 간 협업을 중요하게 다룹니다.</li>
+  <li><a href="https://microsoft.github.io/autogen/">AutoGen</a>: 여러 에이전트가 서로 대화하며 작업을 해결하는 LLM 애플리케이션 개발을 가능하게 하는 프레임워크입니다.</li>
+  <li><a href="https://github.com/xlang-ai/OpenAgents">OpenAgents</a>: 언어 에이전트를 사용하고 호스팅하는 오픈 플랫폼입니다.</li>
+  <li><a href="https://www.llamaindex.ai/">LlamaIndex</a>: 대규모 언어 모델에 사용자 정의 데이터 소스를 연결하는 프레임워크입니다.</li>
+  <li><a href="https://github.com/gpt-engineer-org/gpt-engineer">GPT Engineer</a>: 개발 작업을 완료하기 위한 코드 생성을 자동화하는 도구입니다.</li>
+  <li><a href="https://github.com/melih-unsal/DemoGPT">DemoGPT</a>: 대화형 Streamlit 앱을 생성하는 자율 AI 에이전트입니다.</li>
+  <li><a href="https://github.com/assafelovic/gpt-researcher">GPT Researcher</a>: 다양한 작업에 대한 종합적인 온라인 연구를 위해 설계된 자율 에이전트입니다.</li>
+  <li><a href="https://github.com/OpenBMB/AgentVerse">AgentVerse</a>: 다양한 애플리케이션에서 여러 LLM 기반 에이전트의 배치를 용이하게 하도록 설계되었습니다.</li>
+  <li><a href="https://github.com/aiwaves-cn/agents">Agents</a>: 자율 언어 에이전트를 구축하기 위한 오픈 소스 라이브러리/프레임워크입니다. 장단기 기억, 도구 사용, 웹 탐색, 다중 에이전트 통신 등을 지원하며 인간과 에이전트 간 상호작용 및 상징적 제어와 같은 새로운 기능도 지원합니다.</li>
+  <li><a href="https://github.com/OpenBMB/BMTools">BMTools</a>: 언어 모델을 확장하기 위해 도구 사용을 지원하고, 커뮤니티가 도구를 구축하고 공유할 수 있는 플랫폼입니다.</li>
+  <li><a href="https://www.crewai.io/">crewAI</a>: 엔지니어를 위해 다시 구상된 AI 에이전트 프레임워크로, 강력한 기능을 간단하게 제공합니다.</li>
+  <li><a href="https://github.com/phidatahq/phidata">Phidata</a>: 함수 호출을 사용해 AI 어시스턴트를 구축하기 위한 툴킷입니다.</li>
+</ul>
+
+<h1 id="llm-에이전트-평가">LLM 에이전트 평가</h1>
+
+<hr />
+
+<p><img src="https://www.promptingguide.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fagentbench.15930893.png&amp;w=1080&amp;q=75" alt="Untitled" /></p>
+
+<p><em>AgentBench 벤치마크는 실제 세계의 도전과 8가지 다른 환경에서 LLM-as-Agent를 평가하기 위해 사용됩니다. 그림 출처: Liu et al. 2023</em></p>
+
+<p>LLM 자체를 평가하는 것처럼, LLM 에이전트를 평가하는 것도 어려운 작업입니다.  <a href="https://arxiv.org/pdf/2308.11432.pdf">Wang et al. 2023</a>에 따르면, 일반적인 평가 방법은 다음과 같습니다:</p>
+
+<ul>
+  <li><strong>인간 주석</strong>(<strong>Human Annotation)</strong>: 인간 평가자가 정직성, 유용성, 참여도, 편견 없음 등 애플리케이션에서 중요한 다양한 측면에서 LLM 결과를 직접 평가합니다.</li>
+  <li><strong>튜링 테스트</strong>(<strong>Turing Test)</strong>: 인간 평가자는 실제 인간과 에이전트의 결과를 비교하여 구별할 수 없는 결과가 나오면 에이전트가 인간 수준의 성능을 달성했다고 볼 수 있습니다.</li>
+  <li><strong>메트릭</strong>(<strong>Metrics)</strong>: 에이전트의 품질을 반영하기 위해 세심하게 설계된 지표들입니다. 주요 메트릭으로는 작업 성공률, 인간 유사성, 효율성 등이 있습니다.</li>
+  <li><strong>프로토콜</strong>(<strong>Protocols)</strong>: 메트릭이 어떻게 사용되는지를 결정하는 일반적인 평가 방식입니다. 예를 들어 실제 세계 시뮬레이션, 사회적 평가, 다중 작업 평가, 소프트웨어 테스팅 등이 있습니다.</li>
+  <li><strong>벤치마크</strong>(<strong>Benchmarks)</strong>: LLM 에이전트를 평가하기 위해 설계된 여러 벤치마크가 있습니다. 주목할 만한 예시로는 <a href="https://alfworld.github.io/">ALFWorld(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2304.10750">IGLU(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2307.12573">Tachikuma(opens in a new tab)</a>, <a href="https://github.com/THUDM/AgentBench">AgentBench(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2305.14938">SocKET(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2308.04026">AgentSims(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2305.16504">ToolBench(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2207.01206">WebShop(opens in a new tab)</a>, <a href="https://github.com/stefanbschneider/mobile-env">Mobile-Env(opens in a new tab)</a>, <a href="https://github.com/web-arena-x/webarena">WebArena(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2308.04030">GentBench(opens in a new tab)</a>, <a href="https://project-roco.github.io/">RocoBench(opens in a new tab)</a>, <a href="https://project-roco.github.io/">EmotionBench(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2308.06782">PEB(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2305.13455">ClemBench(opens in a new tab)</a>, <a href="https://arxiv.org/abs/2308.04624">E2E(opens in a new tab)</a> 등이 있습니다.</li>
+</ul>
+
+<h1 id="도전과제">도전과제</h1>
+
+<hr />
+
+<p>LLM 에이전트는 아직 초기 단계이며, 구축 과정에는 많은 도전과 한계가 남아 있습니다:</p>
+
+<ul>
+  <li>역할 수행 능력: LLM 기반 에이전트는 도메인에서 작업을 효과적으로 완료하기 위해 역할을 적응해야 합니다. LLM이 잘 표현하지 못하는 역할에 대해, 드문 역할이나 특이한 캐릭터를 대변하는 데이터로 LLM을 미세 조정할 수 있습니다.</li>
+  <li>장기 계획 및 제한된 컨텍스트 길이: 장기적 계획 수립은 에이전트가 회복 불가능한 오류로 이어질 수 있는 도전적인 부분입니다. LLM의 지원 가능한 컨텍스트 길이에도 한계가 있어, 에이전트의 단기 기억 활용에 제한을 줄 수 있습니다.</li>
+  <li>일반화된 인간 정렬: 다양한 인간 가치와 에이전트를 일치시키는 것은 표준 LLM과 함께 자주 발생하는 도전입니다. 고급 프롬프팅 전략을 설계하여 LLM을 재조정하는 것이 가능한 해결책 중 하나일 수 있습니다.</li>
+  <li>프롬프트 견고성 및 신뢰성: LLM 에이전트는 메모리와 계획 등 다양한 모듈을 구동하는 여러 프롬프트를 포함할 수 있습니다. 프롬프트에 작은 변화만 있어도 LLM에서 신뢰성 문제가 발생하기 쉽습니다. LLM 에이전트는 전체 프롬프트 프레임워크를 포함하므로 견고성 문제에 더 취약할 수 있습니다. 잠재적 해결책으로는 프롬프트 요소를 시행착오를 통해 제작하거나, 프롬프트를 자동으로 최적화/조정하거나, GPT를 이용한 자동 프롬프트 생성 등이 있습니다. LLM과 마찬가지로, LLM 에이전트에서도 환각이 흔한 문제이며, 이 에이전트들은 외부 구성 요소와의 인터페이스를 위해 자연 언어에 의존하는데, 이로 인해 충돌하는 정보가 들어와 환각과 사실성 문제를 일으킬 수 있습니다.</li>
+  <li>지식 경계: 지식 불일치로 인해 발생할 수 있는 환각이나 사실성 문제뿐만 아니라, LLM의 지식 범위를 제어하는 것도 어려워, 이는 시뮬레이션의 효과에 큰 영향을 미칠 수 있습니다. 구체적으로, LLM의 내부 지식은 편향을 도입하거나 사용자가 모르는 지식을 활용하여 특정 환경에서 작동할 때 에이전트의 행동에 영향을 줄 수 있습니다.</li>
+  <li>효율성: LLM 에이전트는 LLM이 처리해야 하는 상당한 양의 요청을 포함하는데, 이는 LLM 추론 속도에 크게 의존할 수 있어 에이전트 작업의 효율성에 영향을 줄 수 있습니다. 여러 에이전트를 배치할 때 비용도 고려해야 할 사항입니다.</li>
+</ul>
+
+<h1 id="참고-자료">참고 자료</h1>
+
+<hr />
+
+<ul>
+  <li><a href="https://lilianweng.github.io/posts/2023-06-23-agent/">LLM Powered Autonomous Agents</a></li>
+  <li><a href="https://arxiv.org/abs/2205.00445">MRKL Systems: A modular, neuro-symbolic architecture that combines large language models, external knowledge sources and discrete reasoning</a></li>
+  <li><a href="https://arxiv.org/abs/2308.11432">A Survey on Large Language Model based Autonomous Agents</a></li>
+  <li><a href="https://arxiv.org/abs/2309.07864">The Rise and Potential of Large Language Model Based Agents: A Survey</a></li>
+  <li><a href="https://arxiv.org/abs/2402.01680">Large Language Model based Multi-Agents: A Survey of Progress and Challenges</a></li>
+  <li><a href="https://arxiv.org/abs/2309.02427">Cognitive Architectures for Language Agents</a></li>
+  <li><a href="https://developer.nvidia.com/blog/introduction-to-llm-agents/">Introduction to LLM Agents</a></li>
+  <li><a href="https://python.langchain.com/docs/use_cases/tool_use/agents">LangChain Agents</a></li>
+  <li><a href="https://developer.nvidia.com/blog/building-your-first-llm-agent-application/">Building Your First LLM Agent Application</a></li>
+  <li><a href="https://huyenchip.com/2023/04/11/llm-engineering.html#control_flow_with_llm_agents">Building LLM applications for production</a></li>
+  <li><a href="https://github.com/kaushikb11/awesome-llm-agents">Awesome LLM agents</a></li>
+  <li><a href="https://github.com/hyp1231/awesome-llm-powered-agent#awesome-llm-powered-agent">Awesome LLM-Powered Agent</a></li>
+  <li><a href="https://www.deeplearning.ai/short-courses/functions-tools-agents-langchain/">Functions, Tools and Agents with LangChain</a></li>
+</ul>]]></content><author><name>Harheem Kim</name></author><category term="LLM" /><summary type="html"><![CDATA[LLM Agents]]></summary></entry><entry><title type="html">Prompt Tuning</title><link href="http://localhost:4000/llm/2024/02/19/prompt-tuning.html" rel="alternate" type="text/html" title="Prompt Tuning" /><published>2024-02-19T23:43:50+09:00</published><updated>2024-02-19T23:43:50+09:00</updated><id>http://localhost:4000/llm/2024/02/19/prompt-tuning</id><content type="html" xml:base="http://localhost:4000/llm/2024/02/19/prompt-tuning.html"><![CDATA[<h1 id="prompt-tuning">Prompt Tuning</h1>
+
+<blockquote>
+  <p><strong>PEFT(Parameter-Efficient Fine-Tuning)는 적은 수의 파라미터를 학습하는것만으로 모델 전체를 파인튜닝하는 것과 유사한 효과를 누릴 수 있도록 해줍니다. PEFT 방법 중 하나인 Prompt Tuning에 대해서 알아봅시다.</strong></p>
+
+</blockquote>
+
+<p><a href="https://arxiv.org/pdf/2104.08691.pdf">https://arxiv.org/pdf/2104.08691.pdf</a></p>
+
+<h1 id="프롬프트-튜닝이란"><strong>프롬프트 튜닝이란?</strong></h1>
+
+<p>언어 모델을 특정 작업에 맞게 조정하기 위해 사용되는 기술입니다. 기존의 방식은 모델을 특정 작업에 맞게 전체적으로 조정해야 했지만, 프롬프트 튜닝은 모델의 핵심 부분을 그대로 유지하면서 작업 특화 부분만 조정합니다. 이는 모델의 ‘냉동’(frozen) 상태를 유지하면서도 필요한 부분에만 초점을 맞추어 효율성을 높이는 방법입니다.</p>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F06fcee26-22da-429a-9e1b-46c98535ed1d%2FUntitled.png?table=block&amp;id=1be7483c-133f-42ec-b874-da2bdfce41bb&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="*Prompt tuning retains the strong task performance of model tuning, while keeping the pre-trained model frozen, enabling efficient multitask serving.*" /></p>
+
+<p><em>Prompt tuning retains the strong task performance of model tuning, while keeping the pre-trained model frozen, enabling efficient multitask serving.</em></p>
+
+<h1 id="작동-원리"><strong>작동 원리</strong></h1>
+
+<p>소프트 프롬프트는 학습 가능한 ‘벡터’로 이루어져 있습니다. 이 벡터들은 입력 텍스트와 결합되어 모델의 입력으로 사용됩니다. 이 벡터들은 기존 어휘에 속하지 않는 ‘가상의 토큰(virtual tokens)’으로서 작동하며, 모델의 기존 파라미터를 변경하지 않고도 특정 작업에 대한 모델의 반응을 조정할 수 있습니다. 모델은 이 입력을 기반으로 예측을 수행하고, 이 과정에서 오차를 계산하여 소프트 프롬프트를 최적화합니다. 이 방법을 통해, 다양한 작업에 대한 지식을 효과적으로 흡수하고 적용할 수 있게 됩니다.</p>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F44052b28-0850-4572-a0dc-2d28dbaa6dcd%2FUntitled.png?table=block&amp;id=8de0b385-4ab8-4411-a713-0b03e716c3a0&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled" /></p>
+
+<p>먼저, 소프트 프롬프트를 고정 길이(e.g., 20 tokens long)의 벡터 시퀀스로 초기화합니다. 이 벡터들은 모델의 입력 텍스트 앞에 배치됩니다.</p>
+
+<p>모델이 입력을 처리할 때, 이 소프트 프롬프트 벡터들도 함께 처리됩니다. 모델이 예측을 수행하면, 예측 결과와 실제 타겟 간의 오차를 계산하여 이 오차를 사용해 소프트 프롬프트 벡터를 업데이트합니다.</p>
+
+<h1 id="간단한-코드">간단한 코드</h1>
+
+<hr />
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">import</span> <span class="n">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
+
+<span class="k">class</span> <span class="nc">SoftEmbedding</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> 
+                <span class="n">wte</span><span class="p">:</span> <span class="n">nn</span><span class="p">.</span><span class="n">Embedding</span><span class="p">,</span>
+                <span class="n">n_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> 
+                <span class="n">random_range</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+                <span class="n">initialize_from_vocab</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">appends learned embedding to 
+
+        Args:
+            wte (nn.Embedding): original transformer word embedding
+            n_tokens (int, optional): number of tokens for task. Defaults to 10.
+            random_range (float, optional): range to init embedding (if not initialize from vocab). Defaults to 0.5.
+            initialize_from_vocab (bool, optional): initalizes from default vocab. Defaults to True.
+        </span><span class="sh">"""</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">SoftEmbedding</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">wte</span> <span class="o">=</span> <span class="n">wte</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">n_tokens</span> <span class="o">=</span> <span class="n">n_tokens</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">learned_embedding</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">parameter</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">initialize_embedding</span><span class="p">(</span><span class="n">wte</span><span class="p">,</span>
+                                                                               <span class="n">n_tokens</span><span class="p">,</span> 
+                                                                               <span class="n">random_range</span><span class="p">,</span> 
+                                                                               <span class="n">initialize_from_vocab</span><span class="p">))</span>
+            
+    <span class="k">def</span> <span class="nf">initialize_embedding</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> 
+                             <span class="n">wte</span><span class="p">:</span> <span class="n">nn</span><span class="p">.</span><span class="n">Embedding</span><span class="p">,</span>
+                             <span class="n">n_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> 
+                             <span class="n">random_range</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> 
+                             <span class="n">initialize_from_vocab</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">initializes learned embedding
+
+        Args:
+            same as __init__
+
+        Returns:
+            torch.float: initialized using original schemes
+        </span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">initialize_from_vocab</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">wte</span><span class="p">.</span><span class="n">weight</span><span class="p">[:</span><span class="n">n_tokens</span><span class="p">].</span><span class="nf">clone</span><span class="p">().</span><span class="nf">detach</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="nc">FloatTensor</span><span class="p">(</span><span class="n">n_tokens</span><span class="p">,</span> <span class="n">wte</span><span class="p">.</span><span class="n">weight</span><span class="p">.</span><span class="nf">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)).</span><span class="nf">uniform_</span><span class="p">(</span><span class="o">-</span><span class="n">random_range</span><span class="p">,</span> <span class="n">random_range</span><span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">run forward pass
+
+        Args:
+            tokens (torch.long): input tokens before encoding
+
+        Returns:
+            torch.float: encoding of text concatenated with learned task specifc embedding
+        </span><span class="sh">"""</span>
+
+				<span class="c1"># Changes: Apply word embeddings to the entire set of input tokens without slicing
+</span>        <span class="n">input_embedding</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">wte</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="n">learned_embedding</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">learned_embedding</span><span class="p">.</span><span class="nf">repeat</span><span class="p">(</span><span class="n">input_embedding</span><span class="p">.</span><span class="nf">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cat</span><span class="p">([</span><span class="n">learned_embedding</span><span class="p">,</span> <span class="n">input_embedding</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>출처: <a href="https://github.com/kipgparker/soft-prompt-tuning/blob/main/soft_embedding.py">https://github.com/kipgparker/soft-prompt-tuning</a></p>
+
+<p>이 코드는 PyTorch를 사용하여 ‘SoftEmbedding’이라는 신경망 모듈을 정의합니다.</p>
+
+<p>이 모듈의 주요 목적은 기존 트랜스포머 모델의 워드 임베딩(word embedding)에 추가적인 학습 가능한 임베딩을 결합하는 것입니다. 이를 통해 특정 작업에 대한 모델의 성능을 향상시킬 수 있습니다.</p>
+
+<p>출처 코드에서는 <code class="language-plaintext highlighter-rouge">input_embedding = self.wte(tokens[:, self.n_tokens:])</code> 로 소프트 프롬프트 토큰의 길이만큼 원본 임베딩을 잘라서 결합하였지만, 저는 원본 임베딩에 추가된 임베딩을 결합해서 사용하기 위해  다음과 같이 코드를 변경하였습니다: <code class="language-plaintext highlighter-rouge">input_embedding = self.wte(tokens)</code></p>
+
+<p>코드를 자세히 살펴보겠습니다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">**SoftEmbedding**</code></p>
+
+<p>이 클래스는 <code class="language-plaintext highlighter-rouge">nn.Module</code>을 상속받아 PyTorch의 신경망 모듈로 정의됩니다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">**__init__**</code></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">wte (nn.Embedding)</code>: 기존 트랜스포머 모델의 워드 임베딩을 나타냅니다.</li>
+  <li><code class="language-plaintext highlighter-rouge">n_tokens (int)</code>: 학습 가능한 추가 토큰의 수입니다. 이 값이 10일 때, 10개의 추가 임베딩 토큰이 생성됩니다.</li>
+  <li><code class="language-plaintext highlighter-rouge">random_range (float)</code>: 임베딩을 초기화할 때 사용되는 범위입니다. 이 값이 0.5일 때, 각 임베딩 값은 -0.5 ~ 0.5 사이의 범위에서 무작위로 초기화됩니다.</li>
+  <li><code class="language-plaintext highlighter-rouge">initialize_from_vocab (bool)</code>: 기존 어휘에서 임베딩을 초기화할지 여부를 결정합니다. 이 값은 아래 <code class="language-plaintext highlighter-rouge">initialize_embedding</code> 에서 어떻게 사용되는지 알 수 있습니다.</li>
+  <li><code class="language-plaintext highlighter-rouge">learned_embedding</code>: 특정 작업에 특화된 정보를 포함할 수 있도록 설계된 새로운 임베딩입니다. 추가적인 학습 가능한 임베딩을 정의하며, 초기화 방법은 <code class="language-plaintext highlighter-rouge">initialize_embedding</code> 메서드에 의해 결정됩니다.</li>
+</ul>
+
+<p><strong><code class="language-plaintext highlighter-rouge">initialize_embedding</code></strong></p>
+
+<ul>
+  <li>이 메서드는 추가 임베딩을 초기화하는 데 사용됩니다.</li>
+  <li><code class="language-plaintext highlighter-rouge">initialize_from_vocab</code>가 <code class="language-plaintext highlighter-rouge">True</code>이면 기존의 워드 임베딩(wte)에서 처음 <code class="language-plaintext highlighter-rouge">n_tokens</code>만큼을 복사하여 사용합니다. 이 방법은 기존 어휘에 기반한 임베딩을 사용하기 때문에, 모델이 이미 학습한 언어적 특성을 유지하도록 합니다.</li>
+  <li><code class="language-plaintext highlighter-rouge">False</code>인 경우, 지정된 <code class="language-plaintext highlighter-rouge">random_range</code>를 사용하여 임베딩을 무작위로 초기화합니다. 이 방법은 모델이 이전에 보지 못한 새로운 종류의 데이터나 작업에 대응해야 할 때 유용합니다.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">**forward**</code></p>
+
+<ul>
+  <li>모델이 입력 데이터를 어떻게 처리하는지 정의합니다. 이 메서드는 입력 토큰을 받아 추가적인 학습된 임베딩과 함께 원래의 워드 임베딩을 결합합니다.</li>
+  <li><code class="language-plaintext highlighter-rouge">tokens</code>: 입력 데이터를 나타냅니다. 이는 모델이 처리할 원시 텍스트를 토큰화한 것입니다.</li>
+  <li><code class="language-plaintext highlighter-rouge">learned_embedding</code>은 모든 입력에 대해 반복되며, 기존 입력 임베딩과 연결됩니다.</li>
+  <li>최종적으로, 학습된 임베딩과 입력 임베딩이 연결되어 반환됩니다.</li>
+</ul>
+
+<h1 id="peft-transformers-라이브러리를-활용한-예시">peft, transformers 라이브러리를 활용한 예시</h1>
+
+<hr />
+
+<p>시작하기 전에 <strong><code class="language-plaintext highlighter-rouge">peft</code></strong>, <strong><code class="language-plaintext highlighter-rouge">transformers</code></strong>, <strong><code class="language-plaintext highlighter-rouge">datasets</code>, <code class="language-plaintext highlighter-rouge">torch</code></strong> 등 필요한 라이브러리를 설치합니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">q</span> <span class="n">peft</span> <span class="n">transformers</span> <span class="n">datasets</span> <span class="n">torch</span>
+</code></pre></div></div>
+
+<p>사용할 모델과 토크나이저를 정의합니다. 이 예시에서는 <strong><code class="language-plaintext highlighter-rouge">bigscience/bloomz-560m</code></strong>을 모델과 토크나이저로 사용하였습니다. <strong><code class="language-plaintext highlighter-rouge">PromptTuningConfig</code></strong>를 정의하여 작업 유형, 가상 토큰의 수, 초기화 텍스트, 토크나이저 이름 또는 경로 등의 세부 정보를 지정합니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoModelForCausalLM</span>
+<span class="kn">from</span> <span class="n">peft</span> <span class="kn">import</span> <span class="n">get_peft_config</span><span class="p">,</span> <span class="n">get_peft_model</span><span class="p">,</span> <span class="n">PromptTuningInit</span><span class="p">,</span> <span class="n">PromptTuningConfig</span><span class="p">,</span> <span class="n">TaskType</span><span class="p">,</span> <span class="n">PeftType</span>
+<span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">from</span> <span class="n">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+<span class="kn">import</span> <span class="n">os</span>
+<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span>
+<span class="kn">from</span> <span class="n">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">default_data_collator</span><span class="p">,</span> <span class="n">get_linear_schedule_with_warmup</span>
+<span class="kn">from</span> <span class="n">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="n">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">device</span> <span class="o">=</span> <span class="sh">"</span><span class="s">cuda</span><span class="sh">"</span>
+<span class="n">model_name_or_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">bigscience/bloomz-560m</span><span class="sh">"</span>
+<span class="n">tokenizer_name_or_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">bigscience/bloomz-560m</span><span class="sh">"</span>
+<span class="n">peft_config</span> <span class="o">=</span> <span class="nc">PromptTuningConfig</span><span class="p">(</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="n">TaskType</span><span class="p">.</span><span class="n">CAUSAL_LM</span><span class="p">,</span>
+    <span class="n">prompt_tuning_init</span><span class="o">=</span><span class="n">PromptTuningInit</span><span class="p">.</span><span class="n">TEXT</span><span class="p">,</span>
+    <span class="n">num_virtual_tokens</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">prompt_tuning_init_text</span><span class="o">=</span><span class="sh">"</span><span class="s">Classify if the tweet is a complaint or not:</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">tokenizer_name_or_path</span><span class="o">=</span><span class="n">model_name_or_path</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="sh">"</span><span class="s">twitter_complaints</span><span class="sh">"</span>
+<span class="n">checkpoint_name</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">model_name_or_path</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">peft_config</span><span class="p">.</span><span class="n">peft_type</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">peft_config</span><span class="p">.</span><span class="n">task_type</span><span class="si">}</span><span class="s">_v1.pt</span><span class="sh">"</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">_</span><span class="sh">"</span>
+<span class="p">)</span>
+<span class="n">text_column</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Tweet text</span><span class="sh">"</span>
+<span class="n">label_column</span> <span class="o">=</span> <span class="sh">"</span><span class="s">text_label</span><span class="sh">"</span>
+<span class="n">max_length</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">lr</span> <span class="o">=</span> <span class="mf">3e-2</span>
+<span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">8</span>
+</code></pre></div></div>
+
+<p>이 예제에서는 <strong><code class="language-plaintext highlighter-rouge">ought/raft</code></strong>의 <strong><code class="language-plaintext highlighter-rouge">twitter_complaints</code></strong>라는 데이터셋을 사용합니다. 이 데이터셋은 트위터의 트윗들을 포함하고 있으며, 감정 분석이나 텍스트 분류를 위한 연구에 주로 사용됩니다. 데이터셋을 전처리하는 코드는 생략합니다. 자세한 내용은 참고 코드를 확인해주세요.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="sh">"</span><span class="s">ought/raft</span><span class="sh">"</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+
+<span class="n">classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sh">"</span><span class="s">_</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s"> </span><span class="sh">"</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="sh">"</span><span class="s">train</span><span class="sh">"</span><span class="p">].</span><span class="n">features</span><span class="p">[</span><span class="sh">"</span><span class="s">Label</span><span class="sh">"</span><span class="p">].</span><span class="n">names</span><span class="p">]</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">text_label</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="n">classes</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">x</span><span class="p">[</span><span class="sh">"</span><span class="s">Label</span><span class="sh">"</span><span class="p">]]},</span>
+    <span class="n">batched</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">num_proc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">dataset</span><span class="p">[</span><span class="sh">"</span><span class="s">train</span><span class="sh">"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>모델을 초기화합니다. <code class="language-plaintext highlighter-rouge">print_trainable_parameters()</code>로 훈련 가능한 파라미터들을 확인할 수 있습니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># creating model
+</span><span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_name_or_path</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="nf">get_peft_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">peft_config</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="nf">print_trainable_parameters</span><span class="p">()</span>
+<span class="n">model</span>
+</code></pre></div></div>
+
+<p>모델의 파라미터를 최적화하기 위해 AdamW 옵티마이저를 사용합니다. 학습률(lr)로 학습 과정에서 얼마나 큰 단계로 가중치를 업데이트할지 결정할 수 있습니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># optimizer and lr scheduler
+</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="nc">AdamW</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+<span class="n">lr_scheduler</span> <span class="o">=</span> <span class="nf">get_linear_schedule_with_warmup</span><span class="p">(</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+    <span class="n">num_warmup_steps</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">num_training_steps</span><span class="o">=</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">)</span> <span class="o">*</span> <span class="n">num_epochs</span><span class="p">),</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>전체 데이터셋에 대해 학습을 수행합니다. 훈련된 모델의 성능을 확인하기 위해 loss와 perplexity를 확인합니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># training and evaluation
+</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+    <span class="n">total_loss</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="nf">tqdm</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">)):</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">.</span><span class="nf">items</span><span class="p">()}</span>
+        <span class="c1">#         print(batch)
+</span>        <span class="c1">#         print(batch["input_ids"].shape)
+</span>        <span class="n">outputs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="o">**</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">.</span><span class="n">loss</span>
+        <span class="n">total_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">float</span><span class="p">()</span>
+        <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+        <span class="n">lr_scheduler</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+
+    <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+    <span class="n">eval_loss</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">eval_preds</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="nf">tqdm</span><span class="p">(</span><span class="n">eval_dataloader</span><span class="p">)):</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">.</span><span class="nf">items</span><span class="p">()}</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="o">**</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">.</span><span class="n">loss</span>
+        <span class="n">eval_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">float</span><span class="p">()</span>
+        <span class="n">eval_preds</span><span class="p">.</span><span class="nf">extend</span><span class="p">(</span>
+            <span class="n">tokenizer</span><span class="p">.</span><span class="nf">batch_decode</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">argmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">.</span><span class="n">logits</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">).</span><span class="nf">detach</span><span class="p">().</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">(),</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">eval_epoch_loss</span> <span class="o">=</span> <span class="n">eval_loss</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">eval_dataloader</span><span class="p">)</span>
+    <span class="n">eval_ppl</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">eval_epoch_loss</span><span class="p">)</span>
+    <span class="n">train_epoch_loss</span> <span class="o">=</span> <span class="n">total_loss</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">)</span>
+    <span class="n">train_ppl</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">train_epoch_loss</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">epoch</span><span class="o">=</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">train_ppl</span><span class="o">=</span><span class="si">}</span><span class="s"> </span><span class="si">{</span><span class="n">train_epoch_loss</span><span class="o">=</span><span class="si">}</span><span class="s"> </span><span class="si">{</span><span class="n">eval_ppl</span><span class="o">=</span><span class="si">}</span><span class="s"> </span><span class="si">{</span><span class="n">eval_epoch_loss</span><span class="o">=</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>참고 코드: <a href="https://github.com/huggingface/peft/blob/main/examples/causal_language_modeling/peft_prompt_tuning_clm.ipynb">https://github.com/huggingface/peft/blob/main/examples/causal_language_modeling/peft_prompt_tuning_clm.ipynb</a></p>
+
+<p>문서: <a href="https://huggingface.co/docs/peft/v0.8.2/en/package_reference/prompt_tuning#peft.PromptTuningConfig">https://huggingface.co/docs/peft/v0.8.2/en/package_reference/prompt_tuning#peft.PromptTuningConfig</a></p>
+
+<h1 id="마무리">마무리</h1>
+
+<hr />
+
+<p>프롬프트 튜닝의 가장 큰 장점은 효율성입니다. 전체 모델을 다시 학습하지 않고도, 매우 적은 양의 파라미터만으로도 특정 작업에 대해 높은 성능을 낼 수 있습니다. 또한, 다양한 작업에 하나의 모델을 사용하여 리소스 활용도가 높아집니다. 특히 대규모 모델에서 이 방법의 효과가 크게 나타납니다.</p>
+
+<p>구글 연구팀의 블로그에 따르면, 프롬프트 튜닝을 적용한 모델은 특정 도메인의 데이터로 학습한 후, 관련된 다른 도메인의 작업에 대해 ‘제로-샷’ 평가를 수행했을 때 더 높은 정확도를 보였습니다. 예를 들어, ‘Quora Question Pairs’ 작업으로 학습된 모델이 ‘MRPC’(뉴스 기사의 문장이 서로 다른 방식으로 표현되었는지 판별하는 작업) 작업에서도 높은 성능을 보였습니다.</p>
+
+<p>이러한 결과는 소프트 프롬프트 튜닝이 모델의 일반화 능력을 향상시키고, 특정 도메인에 과도하게 최적화되지 않도록 하는데 도움을 준다는 것을 시사합니다. 따라서, 언어 모델을 다양한 작업에 적용하고자 할 때 프롬프트 튜닝은 매우 유용한 도구가 될 수 있습니다.</p>
+
+<p>더 자세한 정보와 연구 결과는 <a href="https://blog.research.google/2022/02/guiding-frozen-language-models-with.html">Guiding Frozen Language Models with Learned Soft Prompts</a>를 참고하세요.</p>
+
+<h1 id="reference">Reference</h1>
+
+<p><a href="https://arxiv.org/pdf/2104.08691.pdf">https://arxiv.org/pdf/2104.08691.pdf</a></p>
+
+<p><a href="https://4n3mone.tistory.com/7">https://4n3mone.tistory.com/7</a></p>]]></content><author><name>Harheem Kim</name></author><category term="LLM" /><summary type="html"><![CDATA[Prompt Tuning]]></summary></entry><entry><title type="html">Document Chunking</title><link href="http://localhost:4000/llm/2024/02/14/chunking.html" rel="alternate" type="text/html" title="Document Chunking" /><published>2024-02-14T22:56:23+09:00</published><updated>2024-02-14T22:56:23+09:00</updated><id>http://localhost:4000/llm/2024/02/14/chunking</id><content type="html" xml:base="http://localhost:4000/llm/2024/02/14/chunking.html"><![CDATA[<h1 id="문서-청킹-document-chunking">문서 청킹 (Document Chunking)</h1>
+
+<p>큰 문서를 다룰 때, 전체 문서를 단일 벡터로 임베딩하는 것은 실용적이지 않을때가 많습니다. 이 문제를 해결할 수 있는 방법 중 하나인 문서 청킹에 대해 이야기해보고자 합니다.</p>
+
+<p>문서 청킹은 큰 문서를 임베딩하기 위해 더 작고 관리 가능한 청크로 나누는 것을 의미합니다.</p>
+
+<p>(청킹은 일반적으로 정보를 의미 있는 묶음으로 분류하는 것을 의미합니다. 청크는 의미에 따라 묶여진 정보의 덩어리로 이해할 수 있습니다.)</p>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2Fc3a4dc1c-8e9b-4d33-b0d6-c024fe71a7f1%2FUntitled.png?table=block&amp;id=0968fda9-4668-43c8-9da4-3e2a21316153&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="[https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023](https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023)" /></p>
+
+<p><a href="https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023">https://magazine.sebastianraschka.com/p/ai-and-open-source-in-2023</a></p>
+
+<h1 id="최대-토큰-범위-분할-max-token-window-chunking">최대 토큰 범위 분할 (Max Token Window Chunking)</h1>
+
+<hr />
+
+<p>주어진 최대 크기의 청크로 문서를 나누는 것을 포함합니다. 예를 들어, 최대 토큰 수를 256으로 설정한다면, 256 토큰보다는 작은 청크로 분리가 될 것입니다. 비슷한 크기의 청크를 생성하는 것은 시스템을 일관성 있게 만드는 데 도움이 됩니다.</p>
+
+<p>이 방법은 중요한 텍스트 일부를 잘라낼 수 있어 문맥이 분리가 될 수 있습니다. 이 문제를 보완하기 위해 토큰이 청크 사이에 공유되도록 지정된 값만큼 겹치게 하도록 할 수 있습니다. 이렇게 하면 중복된 토큰이 생기지만, 더 높은 정확도를 기대할 수 있습니다. 이는 아래 코드에서 overlapping_factor에 해당하는 부분입니다.</p>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F8cc13022-4b14-4a7f-8d7b-45b47c4090e5%2FUntitled.png?table=block&amp;id=eef0e191-c8bb-485e-a12b-1ade3bf6e920&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="[https://www.pinecone.io/learn/chunking-strategies/](https://www.pinecone.io/learn/chunking-strategies/)" /></p>
+
+<p><a href="https://www.pinecone.io/learn/chunking-strategies/">https://www.pinecone.io/learn/chunking-strategies/</a></p>
+
+<p>중첩을 포함하는 또는 포함하지 않는 텍스트 분할하기</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#from transformers import BertTokenizer
+#tokenizer = BertTokenizer.from_pretrained("bert-base-multilingual-cased")
+</span>
+<span class="kn">import</span> <span class="n">tiktoken</span>
+<span class="kn">import</span> <span class="n">re</span>
+
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tiktoken</span><span class="p">.</span><span class="nf">get_encoding</span><span class="p">(</span><span class="sh">"</span><span class="s">cl100k_base</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Function to split the text into chunks of a maximum number of tokens. Inspired by OpenAI
+</span><span class="k">def</span> <span class="nf">overlapping_chunks</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">max_tokens</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="n">overlapping_factor</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+    <span class="sh">'''</span><span class="s">
+    max_tokens: tokens we want per chunk
+    overlapping_factor: number of sentences to start each chunk with that overlaps with the previous chunk
+    </span><span class="sh">'''</span>
+
+    <span class="c1"># Split the text using punctuation
+</span>    <span class="n">sentences</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sa">r</span><span class="sh">'</span><span class="s">[.?!]</span><span class="sh">'</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+    <span class="c1"># Get the number of tokens for each sentence
+</span>    <span class="n">n_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="sh">"</span><span class="s"> </span><span class="sh">"</span> <span class="o">+</span> <span class="n">sentence</span><span class="p">))</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">sentences</span><span class="p">]</span>
+    <span class="n">chunks</span><span class="p">,</span> <span class="n">tokens_so_far</span><span class="p">,</span> <span class="n">chunk</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[]</span>
+
+    <span class="c1"># Loop through the sentences and tokens joined together in a tuple
+</span>    <span class="k">for</span> <span class="n">sentence</span><span class="p">,</span> <span class="n">token</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">sentences</span><span class="p">,</span> <span class="n">n_tokens</span><span class="p">):</span>
+
+        <span class="c1"># If the number of tokens so far plus the number of tokens in the current sentence is greater 
+</span>        <span class="c1"># than the max number of tokens, then add the chunk to the list of chunks and reset
+</span>        <span class="c1"># the chunk and tokens so far
+</span>        <span class="k">if</span> <span class="n">tokens_so_far</span> <span class="o">+</span> <span class="n">token</span> <span class="o">&gt;</span> <span class="n">max_tokens</span><span class="p">:</span>
+            <span class="n">chunks</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s">. </span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="o">+</span> <span class="sh">"</span><span class="s">.</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">overlapping_factor</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="o">-</span><span class="n">overlapping_factor</span><span class="p">:]</span>
+                <span class="n">tokens_so_far</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">([</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">c</span><span class="p">))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">tokens_so_far</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># If the number of tokens in the current sentence is greater than the max number of 
+</span>        <span class="c1"># tokens, go to the next sentence
+</span>        <span class="k">if</span> <span class="n">token</span> <span class="o">&gt;</span> <span class="n">max_tokens</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Otherwise, add the sentence to the chunk and add the number of tokens to the total
+</span>        <span class="n">chunk</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">sentence</span><span class="p">)</span>
+        <span class="n">tokens_so_far</span> <span class="o">+=</span> <span class="n">token</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
+        <span class="n">chunks</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s">. </span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="o">+</span> <span class="sh">"</span><span class="s">.</span><span class="sh">"</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">chunks</span>
+</code></pre></div></div>
+
+<p>중첩을 포함하지 않는 텍스트 분할</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">text</span> <span class="o">=</span> <span class="sh">"</span><span class="s">특수 상대성 이론은 일반적으로 아인슈타인이 제안한 2가지 가정을 통한 유도법이 널리 받아들여지는데, 그것은 다음과 같다. 상대성 원리: 물리법칙이 가장 간단한 형태로 성립하는 좌표계에 대해 등속 직선 운동하는 모든 좌표계에서 동일한 물리 법칙이 적용된다. (이는 관성 좌표계를 정의한다.) 광속 불변의 원리: 모든 관성 좌표계에서 진공 중에서 진행하는 빛의 속도는 관찰자나 광원의 속도에 관계없이 일정하다. 상대성 원리는 고전역학의 가장 유서깊은 결론 중 하나이며, 광속 불변의 원리는 전자기학에서 F=ma만큼 중요한 맥스웰 방정식의 가장 단순한 표현을 갖는 결과 중 하나이다. 즉, 고전역학과 전자기학에서 핵심이 될만한 요소를 하나씩 빼다가 모은 것이다. 둘을 한마디로 합치면 </span><span class="sh">'</span><span class="s">전자기학이 상대성 원리를 따른다면?</span><span class="sh">'</span><span class="s">이라고 요약할 수 있겠다. 물론 상대성 원리는 고전역학의 산물이지만, 고전역학이 상대성 원리를 만족시킬 때와 전자기학이 상대성 원리를 만족시킬 때의 결론이 달라진다. 보다 분명히 말해서 각 역학에서의 물리법칙의 특성이 다르며, 물리법칙을 서술하는 기준인 시간과 공간이 엮이는 구조가 달라진다. 어쨌든, 당시의 가장 큰 문제의식은 두 역학을 있는 그대로 만족시키는 상대성 원리는 존재하지 않는다는 것이며, 상대성 원리를 그대로 가져간다면 어느 하나는 (혹은 둘 다) 이론이 일부 수정될 수밖에 없다는 것이다. 그리고, 당시의 실험결과는 전자기학이 상대성 원리를 위배하지 않는다는 결론에 손을 들어주고 있었다. 매우 어려운 문제이지만, 이 둘을 논리적으로 잘 엮을 수 있다면 당시 물리학의 쌍두마차였던 (지금의 일반 상대성 이론과 양자역학처럼) 두 이론을 통합하는 데 성공하게 된다. 특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다. 특수 상대성 이론을 제대로 유도하기 위해선 사실 한 가지가 더 필요한데, 바로 시간을 다시 정의해야 한다. 이것이야말로 아인슈타인의 가장 중요한 통찰 중 하나이며 이러한 과정을 거치고 나면, 시간이 진정한 의미에서 공간과 동등한 </span><span class="sh">'</span><span class="s">좌표축</span><span class="sh">'</span><span class="s">의 자격을 가지게 된다.</span><span class="sh">"</span>
+
+<span class="n">split</span> <span class="o">=</span> <span class="nf">overlapping_chunks</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">overlapping_factor</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">avg_length</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">([</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">split</span><span class="p">])</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">non-overlapping chunking approach has </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span><span class="si">}</span><span class="s"> documents with average length </span><span class="si">{</span><span class="n">avg_length</span><span class="si">:</span><span class="p">.</span><span class="mi">1</span><span class="n">f</span><span class="si">}</span><span class="s"> tokens</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>결과</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>non-overlapping chunking approach has 6 documents with average length 177.3 tokens
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[1] 특수 상대성 이론은 일반적으로 아인슈타인이 제안한 2가지 가정을 통한 유도법이 널리 받아들여지는데, 그것은 다음과 같다.  상대성 원리: 물리법칙이 가장 간단한 형태로 성립하는 좌표계에 대해 등속 직선 운동하는 모든 좌표계에서 동일한 물리 법칙이 적용된다.  (이는 관성 좌표계를 정의한다. ) 광속 불변의 원리: 모든 관성 좌표계에서 진공 중에서 진행하는 빛의 속도는 관찰자나 광원의 속도에 관계없이 일정하다.
+
+[2] 상대성 원리는 고전역학의 가장 유서깊은 결론 중 하나이며, 광속 불변의 원리는 전자기학에서 F=ma만큼 중요한 맥스웰 방정식의 가장 단순한 표현을 갖는 결과 중 하나이다.  즉, 고전역학과 전자기학에서 핵심이 될만한 요소를 하나씩 빼다가 모은 것이다.  둘을 한마디로 합치면 '전자기학이 상대성 원리를 따른다면. '이라고 요약할 수 있겠다.
+
+[3] 물론 상대성 원리는 고전역학의 산물이지만, 고전역학이 상대성 원리를 만족시킬 때와 전자기학이 상대성 원리를 만족시킬 때의 결론이 달라진다.  보다 분명히 말해서 각 역학에서의 물리법칙의 특성이 다르며, 물리법칙을 서술하는 기준인 시간과 공간이 엮이는 구조가 달라진다.
+
+[4] 어쨌든, 당시의 가장 큰 문제의식은 두 역학을 있는 그대로 만족시키는 상대성 원리는 존재하지 않는다는 것이며, 상대성 원리를 그대로 가져간다면 어느 하나는 (혹은 둘 다) 이론이 일부 수정될 수밖에 없다는 것이다.  그리고, 당시의 실험결과는 전자기학이 상대성 원리를 위배하지 않는다는 결론에 손을 들어주고 있었다.
+
+[5] 매우 어려운 문제이지만, 이 둘을 논리적으로 잘 엮을 수 있다면 당시 물리학의 쌍두마차였던 (지금의 일반 상대성 이론과 양자역학처럼) 두 이론을 통합하는 데 성공하게 된다.  특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다.  특수 상대성 이론을 제대로 유도하기 위해선 사실 한 가지가 더 필요한데, 바로 시간을 다시 정의해야 한다.
+
+[6] 이것이야말로 아인슈타인의 가장 중요한 통찰 중 하나이며 이러한 과정을 거치고 나면, 시간이 진정한 의미에서 공간과 동등한 '좌표축'의 자격을 가지게 된다. .
+
+</code></pre></div></div>
+
+<p>중첩을 포함하는 텍스트 분할</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">split</span> <span class="o">=</span> <span class="nf">overlapping_chunks</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="n">avg_length</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">([</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">split</span><span class="p">])</span> <span class="o">/</span> <span class="nf">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">overlapping chunking approach has </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span><span class="si">}</span><span class="s"> documents with average length </span><span class="si">{</span><span class="n">avg_length</span><span class="si">:</span><span class="p">.</span><span class="mi">1</span><span class="n">f</span><span class="si">}</span><span class="s"> tokens</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>결과</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>overlapping chunking approach has 10 documents with average length 231.4 tokens
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[1] 특수 상대성 이론은 일반적으로 아인슈타인이 제안한 2가지 가정을 통한 유도법이 널리 받아들여지는데, 그것은 다음과 같다.  상대성 원리: 물리법칙이 가장 간단한 형태로 성립하는 좌표계에 대해 등속 직선 운동하는 모든 좌표계에서 동일한 물리 법칙이 적용된다.  (이는 관성 좌표계를 정의한다. ) 광속 불변의 원리: 모든 관성 좌표계에서 진공 중에서 진행하는 빛의 속도는 관찰자나 광원의 속도에 관계없이 일정하다.
+
+[2] (이는 관성 좌표계를 정의한다. ) 광속 불변의 원리: 모든 관성 좌표계에서 진공 중에서 진행하는 빛의 속도는 관찰자나 광원의 속도에 관계없이 일정하다.  상대성 원리는 고전역학의 가장 유서깊은 결론 중 하나이며, 광속 불변의 원리는 전자기학에서 F=ma만큼 중요한 맥스웰 방정식의 가장 단순한 표현을 갖는 결과 중 하나이다.  즉, 고전역학과 전자기학에서 핵심이 될만한 요소를 하나씩 빼다가 모은 것이다.
+
+[3] 상대성 원리는 고전역학의 가장 유서깊은 결론 중 하나이며, 광속 불변의 원리는 전자기학에서 F=ma만큼 중요한 맥스웰 방정식의 가장 단순한 표현을 갖는 결과 중 하나이다.  즉, 고전역학과 전자기학에서 핵심이 될만한 요소를 하나씩 빼다가 모은 것이다.  둘을 한마디로 합치면 '전자기학이 상대성 원리를 따른다면. '이라고 요약할 수 있겠다.
+
+[4] 둘을 한마디로 합치면 '전자기학이 상대성 원리를 따른다면. '이라고 요약할 수 있겠다.  물론 상대성 원리는 고전역학의 산물이지만, 고전역학이 상대성 원리를 만족시킬 때와 전자기학이 상대성 원리를 만족시킬 때의 결론이 달라진다.  보다 분명히 말해서 각 역학에서의 물리법칙의 특성이 다르며, 물리법칙을 서술하는 기준인 시간과 공간이 엮이는 구조가 달라진다.
+
+[5] 물론 상대성 원리는 고전역학의 산물이지만, 고전역학이 상대성 원리를 만족시킬 때와 전자기학이 상대성 원리를 만족시킬 때의 결론이 달라진다.  보다 분명히 말해서 각 역학에서의 물리법칙의 특성이 다르며, 물리법칙을 서술하는 기준인 시간과 공간이 엮이는 구조가 달라진다.  어쨌든, 당시의 가장 큰 문제의식은 두 역학을 있는 그대로 만족시키는 상대성 원리는 존재하지 않는다는 것이며, 상대성 원리를 그대로 가져간다면 어느 하나는 (혹은 둘 다) 이론이 일부 수정될 수밖에 없다는 것이다.
+
+[6] 보다 분명히 말해서 각 역학에서의 물리법칙의 특성이 다르며, 물리법칙을 서술하는 기준인 시간과 공간이 엮이는 구조가 달라진다.  어쨌든, 당시의 가장 큰 문제의식은 두 역학을 있는 그대로 만족시키는 상대성 원리는 존재하지 않는다는 것이며, 상대성 원리를 그대로 가져간다면 어느 하나는 (혹은 둘 다) 이론이 일부 수정될 수밖에 없다는 것이다.  그리고, 당시의 실험결과는 전자기학이 상대성 원리를 위배하지 않는다는 결론에 손을 들어주고 있었다.
+
+[7] 어쨌든, 당시의 가장 큰 문제의식은 두 역학을 있는 그대로 만족시키는 상대성 원리는 존재하지 않는다는 것이며, 상대성 원리를 그대로 가져간다면 어느 하나는 (혹은 둘 다) 이론이 일부 수정될 수밖에 없다는 것이다.  그리고, 당시의 실험결과는 전자기학이 상대성 원리를 위배하지 않는다는 결론에 손을 들어주고 있었다.  매우 어려운 문제이지만, 이 둘을 논리적으로 잘 엮을 수 있다면 당시 물리학의 쌍두마차였던 (지금의 일반 상대성 이론과 양자역학처럼) 두 이론을 통합하는 데 성공하게 된다.
+
+[8] 그리고, 당시의 실험결과는 전자기학이 상대성 원리를 위배하지 않는다는 결론에 손을 들어주고 있었다.  매우 어려운 문제이지만, 이 둘을 논리적으로 잘 엮을 수 있다면 당시 물리학의 쌍두마차였던 (지금의 일반 상대성 이론과 양자역학처럼) 두 이론을 통합하는 데 성공하게 된다.  특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다.
+
+[9] 매우 어려운 문제이지만, 이 둘을 논리적으로 잘 엮을 수 있다면 당시 물리학의 쌍두마차였던 (지금의 일반 상대성 이론과 양자역학처럼) 두 이론을 통합하는 데 성공하게 된다.  특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다.  특수 상대성 이론을 제대로 유도하기 위해선 사실 한 가지가 더 필요한데, 바로 시간을 다시 정의해야 한다.
+
+[10] 특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다.  특수 상대성 이론을 제대로 유도하기 위해선 사실 한 가지가 더 필요한데, 바로 시간을 다시 정의해야 한다.  이것이야말로 아인슈타인의 가장 중요한 통찰 중 하나이며 이러한 과정을 거치고 나면, 시간이 진정한 의미에서 공간과 동등한 '좌표축'의 자격을 가지게 된다. .
+
+</code></pre></div></div>
+
+<p>중첩을 포함하지 않는 경우 마지막 청크</p>
+
+<blockquote>
+  <p>이것이야말로 아인슈타인의 가장 중요한 통찰 중 하나이며 이러한 과정을 거치고 나면, 시간이 진정한 의미에서 공간과 동등한 ‘좌표축’의 자격을 가지게 된다.</p>
+</blockquote>
+
+<p>중첩을 포함하는 경우 마지막 청크</p>
+
+<blockquote>
+  <p>특수 상대성 이론은 이 두 가지 가정으로부터 유일하게 얻어지며, 이론적으로나 실험적으로나 현대 물리학에서 가장 기반이 확고한 이론이 되었다.  특수 상대성 이론을 제대로 유도하기 위해선 사실 한 가지가 더 필요한데, 바로 시간을 다시 정의해야 한다.  이것이야말로 아인슈타인의 가장 중요한 통찰 중 하나이며 이러한 과정을 거치고 나면, 시간이 진정한 의미에서 공간과 동등한 ‘좌표축’의 자격을 가지게 된다.</p>
+</blockquote>
+
+<p>overlapping_factor를 2로 설정하였기에, 겹치는 문장이 2개가 됩니다. 마지막 문장을 비교해보면, 중첩을 포함하는 경우 포함하지 않는 경우보다 2개의 문장이 더 많아진 것을 볼 수 있습니다.</p>
+
+<p>중첩을 사용하면 청크의 수가 증가합니다. 중첩 비율이 높을수록 시스템에 더 많은 중복성이 생깁니다. 이 방법은 문서의 자연스러운 구조를 고려하지 않아, 정보가 청크 사이에 나누어지거나 중복된 정보가 있는 청크가 생기게 됩니다. 이러한 현상은 검색 시스템을 혼란스럽게 하게 됩니다.</p>
+
+<h1 id="맞춤형-구분-기호-찾기">맞춤형 구분 기호 찾기</h1>
+
+<hr />
+
+<p>청킹 방법을 돕기 위해, PDF에서 페이지 분리나 단락 사이의 새로운 줄과 같은 구분 기호를 찾을 수 있습니다. 주어진 문서에 대해 텍스트 내의 자연스러운 공백을 식별하게 되면 의미 있는 텍스트 단위를 생성하게 될 것입니다. 논문 pdf에서 일반적인 공백 유형을 찾아보도록 하겠습니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">pdfplumber</span>
+<span class="kn">from</span> <span class="n">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="n">pdf</span> <span class="o">=</span> <span class="n">pdfplumber</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="sh">'</span><span class="s">evolution_of_apartment_design_and_defects_over_eras.pdf</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">pages</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">.</span><span class="n">pages</span>
+
+<span class="n">eras_doc</span> <span class="o">=</span> <span class="sh">''</span>
+<span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">pages</span><span class="p">:</span>
+    <span class="n">eras_doc</span> <span class="o">+=</span> <span class="sh">'</span><span class="se">\n\n</span><span class="sh">'</span> <span class="o">+</span> <span class="n">page</span><span class="p">.</span><span class="nf">extract_text</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>책에서는 PyPDF2를 사용하였는데, PyPDF2로 한글로 작성된 논문에서 텍스트를 추출하니 띄어쓰기를 제대로 처리하지 못하는 문제가 있어서 pdfplumber 라이브러리를 사용하였습니다.</p>
+
+<p>eras_doc의 일부분:</p>
+
+<blockquote>
+  <p>\n\n국 문 요 약\n시대별 공동주택 설계변천에 따른\n하자유형 변화 및 특징에 관한 연구\n연세대학교 공학대학원\n건 축 공 학 전 공\n강 태 준\n1960년대부터 시작된 경제개발 5개년 계획에 따라 우리나라는 급속한 경제성장과\n함께 도시화 및 산업화로 변화되었으며, 좁은 국토면적과 높은 인구밀도 등으로\n인한 주택문제를 해결하기 위해 우리나라의 특성에 적합한 주거양식인 아파트라는\n공동주택형식을 도입하게 되었다.</p>
+</blockquote>
+
+<p>그러나, pdf에서 자동으로 생성된 줄바꿈과 실제 문서의 단락을 구분하는 것을 못하기 때문에 아래의 코드를 사용하여 문장이 마무리 되지 않았는데, 줄바꿈이 된 경우 \n 을 지우는 코드를 적용하였습니다.</p>
+
+<p>제목과 같이 문장이 아닌 경우 단락을 제대로 구분하지 못하지만, 문장으로 구분된 단락은 제대로 구분하는 것을 확인할 수 있습니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">re</span>
+
+<span class="k">def</span> <span class="nf">remove_unwanted_newlines</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">re</span><span class="p">.</span><span class="nf">sub</span><span class="p">(</span><span class="sa">r</span><span class="sh">'</span><span class="s">(?&lt;!\.)\n</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s"> </span><span class="sh">'</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+<span class="n">modified_text</span> <span class="o">=</span> <span class="nf">remove_unwanted_newlines</span><span class="p">(</span><span class="n">eras_doc</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>modified_text의 일부분:</p>
+
+<blockquote>
+  <p>국 문 요 약 시대별 공동주택 설계변천에 따른 하자유형 변화 및 특징에 관한 연구 연세대학교 공학대학원 건 축 공 학 전 공 강 태 준 1960년대부터 시작된 경제개발 5개년 계획에 따라 우리나라는 급속한 경제성장과 함께 도시화 및 산업화로 변화되었으며, 좁은 국토면적과 높은 인구밀도 등으로 인한 주택문제를 해결하기 위해 우리나라의 특성에 적합한 주거양식인 아파트라는 공동주택형식을 도입하게 되었다.</p>
+</blockquote>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2Fc227f1c8-9495-45bd-b415-20580b1b802d%2FUntitled.png?table=block&amp;id=3b9f5316-740d-4bfd-8800-4e5ef34ed253&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled" /></p>
+
+<p>modified_text의 일부분:</p>
+
+<blockquote>
+  <p>첫째, 공동주택의 설계는 2000년대 이전의 정형화된 평면 및 마감재 구성방식에서 소비자들의 생활방식의 변화와 욕구를 충족시킬 수 있는 다양한 평면과 마감재로 변화되고 있는 것으로 나타났다.</p>
+</blockquote>
+
+<blockquote>
+  <p>둘째, 공동주택의 하자는 건축공사의 마감공사부분이 가장 많이 발생하였으며, 주요 유형으로는 불량, 기타, 파손 등이 전체하자의 76.8~79%를 차지하고 있어 이에 따른 관리가 필요한 것으로 분석되었다.</p>
+</blockquote>
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F5b42074c-1ae0-42a0-82df-2984207465be%2FUntitled.png?table=block&amp;id=32cb48a8-dcf6-44a0-bd38-5f0a7089653c&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="Untitled" /></p>
+
+<p>아래 코드를 사용하여 문서에서 가장 빈번하게 발생하는 공백을 찾아낼 수 있습니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Importing the Counter and re libraries
+</span><span class="kn">from</span> <span class="n">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">import</span> <span class="n">re</span>
+
+<span class="c1"># Find all occurrences of one or more spaces in 'modified_text'
+</span><span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="nf">findall</span><span class="p">(</span><span class="sa">r</span><span class="sh">'</span><span class="s">[\s]{1,}</span><span class="sh">'</span><span class="p">,</span> <span class="n">modified_text</span><span class="p">)</span>
+
+<span class="c1"># The 10 most frequent spaces that occur in the document
+</span><span class="n">most_common_spaces</span> <span class="o">=</span> <span class="nc">Counter</span><span class="p">(</span><span class="n">matches</span><span class="p">).</span><span class="nf">most_common</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Print the most common spaces and their frequencies
+</span><span class="nf">print</span><span class="p">(</span><span class="n">most_common_spaces</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[(</span><span class="sh">'</span><span class="s"> </span><span class="sh">'</span><span class="p">,</span> <span class="mi">14214</span><span class="p">),</span> <span class="p">(</span><span class="sh">'</span><span class="se">\n</span><span class="sh">'</span><span class="p">,</span> <span class="mi">203</span><span class="p">),</span> <span class="p">(</span><span class="sh">'</span><span class="s"> </span><span class="sh">'</span><span class="p">,</span> <span class="mi">87</span><span class="p">),</span> <span class="p">(</span><span class="sh">'</span><span class="se">\n</span><span class="s"> </span><span class="sh">'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+</code></pre></div></div>
+
+<p>생성된 결과를 보고 적절한 공백을 선택하여 문서를 구분해야 합니다. 이 방법은 실용적이지만, 원본 문서에 대한 높은 이해도와 많은 지식이 필요할 수 있습니다.</p>
+
+<h1 id="의미-기반-문서-생성을-위한-클러스터링">의미 기반 문서 생성을 위한 클러스터링</h1>
+
+<hr />
+
+<p>이 접근 방법은 의미적으로 유사한 작은 청크를 결합하여 새로운 문서를 생성하는 것입니다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">sklearn.cluster</span> <span class="kn">import</span> <span class="n">AgglomerativeClustering</span>
+<span class="kn">from</span> <span class="n">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">cosine_similarity</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="c1"># Assume you have a list of text embeddings called `embeddings`
+# First, compute the cosine similarity matrix between all pairs of embeddings
+</span><span class="n">cosine_sim_matrix</span> <span class="o">=</span> <span class="nf">cosine_similarity</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+
+<span class="c1"># Instantiate the AgglomerativeClustering model
+</span><span class="n">agg_clustering</span> <span class="o">=</span> <span class="nc">AgglomerativeClustering</span><span class="p">(</span>
+    <span class="n">n_clusters</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>         <span class="c1"># the algorithm will determine the optimal number of clusters based on the data
+</span>    <span class="n">distance_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># clusters will be formed until all pairwise distances between clusters are greater than 0.1
+</span>    <span class="n">affinity</span><span class="o">=</span><span class="sh">'</span><span class="s">precomputed</span><span class="sh">'</span><span class="p">,</span>  <span class="c1"># we are providing a precomputed distance matrix (1 - similarity matrix) as input
+</span>    <span class="n">linkage</span><span class="o">=</span><span class="sh">'</span><span class="s">complete</span><span class="sh">'</span>       <span class="c1"># form clusters by iteratively merging the smallest clusters based on the maximum distance between their components
+</span><span class="p">)</span>
+
+<span class="c1"># Fit the model to the cosine distance matrix (1 - similarity matrix)
+</span><span class="n">agg_clustering</span><span class="p">.</span><span class="nf">fit</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cosine_sim_matrix</span><span class="p">)</span>
+
+<span class="c1"># Get the cluster labels for each embedding
+</span><span class="n">cluster_labels</span> <span class="o">=</span> <span class="n">agg_clustering</span><span class="p">.</span><span class="n">labels_</span>
+
+<span class="c1"># Print the number of embeddings in each cluster
+</span><span class="n">unique_labels</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">unique</span><span class="p">(</span><span class="n">cluster_labels</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">unique_labels</span><span class="p">,</span> <span class="n">counts</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Cluster </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s"> embeddings</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>의미적으로 더 연관성이 있도록 청크를 생성하겠지만, 내용의 일부가 주변 텍스트와 맥락에서 벗어날 수 있다는 단점이 있습니다. 따라서 이 방법은 각 청크들이 서로 문맥적으로 연관성이 없을 때 (독립적일 때) 잘 작동하게 됩니다.</p>
+
+<h1 id="청크로-나누지-않고-전체-문서-사용하기">청크로 나누지 않고 전체 문서 사용하기</h1>
+
+<hr />
+
+<p>가장 쉬운 방법이겠지만, 문서가 너무 길어서 텍스트를 임베딩할 때 context window 한계에 걸리는 경우에 단점이 있습니다. 또한 문서에 불필요한 내용들이 채워져 있다면 임베딩의 품질이 저하될 수 있습니다. 이러한 단점들은 여러 페이지의 큰 문서에서 복합적으로 나타납니다.</p>
+
+<h1 id="summary">Summary</h1>
+
+<hr />
+
+<p><img src="https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F2a330106-7d16-49d5-9057-343dfb0cb92c%2F7e7912aa-a0ce-4977-9ebc-34011e67363f%2FUntitled.png?table=block&amp;id=76fa0398-5f86-4261-9b50-d7915c3508d7&amp;spaceId=2a330106-7d16-49d5-9057-343dfb0cb92c&amp;width=2000&amp;userId=93a922d0-0a24-445b-bddf-8a085b93d655&amp;cache=v2" alt="쉽고 빠르게 익히는 실전 LLM 82 페이지의 표 2-1" /></p>
+
+<p>쉽고 빠르게 익히는 실전 LLM 82 페이지의 표 2-1</p>
+
+<h1 id="참고한-코드">참고한 코드</h1>
+
+<p><a href="https://github.com/sinanuozdemir/quick-start-guide-to-llms/blob/main/notebooks/2_semantic_search.ipynb">https://github.com/sinanuozdemir/quick-start-guide-to-llms/blob/main/notebooks/2_semantic_search.ipynb</a></p>]]></content><author><name>Harheem Kim</name></author><category term="LLM" /><summary type="html"><![CDATA[문서 청킹 (Document Chunking)]]></summary></entry></feed>

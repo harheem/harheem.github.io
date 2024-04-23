@@ -5,6 +5,7 @@ subtitle: "The Power of Scale for Parameter-Efficient Prompt Tuning"
 date:   2024-02-19 20:13:50 +0530
 categories: LLM
 author: "Harheem Kim"
+toc: true
 ---
 
 # Prompt Tuning
@@ -14,7 +15,7 @@ author: "Harheem Kim"
 
 [https://arxiv.org/pdf/2104.08691.pdf](https://arxiv.org/pdf/2104.08691.pdf)
 
-## **프롬프트 튜닝이란?**
+# **프롬프트 튜닝이란?**
 
 언어 모델을 특정 작업에 맞게 조정하기 위해 사용되는 기술입니다. 기존의 방식은 모델을 특정 작업에 맞게 전체적으로 조정해야 했지만, 프롬프트 튜닝은 모델의 핵심 부분을 그대로 유지하면서 작업 특화 부분만 조정합니다. 이는 모델의 '냉동'(frozen) 상태를 유지하면서도 필요한 부분에만 초점을 맞추어 효율성을 높이는 방법입니다.
 
@@ -22,7 +23,7 @@ author: "Harheem Kim"
 
 *Prompt tuning retains the strong task performance of model tuning, while keeping the pre-trained model frozen, enabling efficient multitask serving.*
 
-## **작동 원리**
+# **작동 원리**
 
 소프트 프롬프트는 학습 가능한 ‘벡터’로 이루어져 있습니다. 이 벡터들은 입력 텍스트와 결합되어 모델의 입력으로 사용됩니다. 이 벡터들은 기존 어휘에 속하지 않는 '가상의 토큰(virtual tokens)'으로서 작동하며, 모델의 기존 파라미터를 변경하지 않고도 특정 작업에 대한 모델의 반응을 조정할 수 있습니다. 모델은 이 입력을 기반으로 예측을 수행하고, 이 과정에서 오차를 계산하여 소프트 프롬프트를 최적화합니다. 이 방법을 통해, 다양한 작업에 대한 지식을 효과적으로 흡수하고 적용할 수 있게 됩니다.
 
@@ -32,7 +33,7 @@ author: "Harheem Kim"
 
 모델이 입력을 처리할 때, 이 소프트 프롬프트 벡터들도 함께 처리됩니다. 모델이 예측을 수행하면, 예측 결과와 실제 타겟 간의 오차를 계산하여 이 오차를 사용해 소프트 프롬프트 벡터를 업데이트합니다.
 
-## 간단한 코드
+# 간단한 코드
 
 ---
 
@@ -130,7 +131,7 @@ class SoftEmbedding(nn.Module):
 - `learned_embedding`은 모든 입력에 대해 반복되며, 기존 입력 임베딩과 연결됩니다.
 - 최종적으로, 학습된 임베딩과 입력 임베딩이 연결되어 반환됩니다.
 
-## peft, transformers 라이브러리를 활용한 예시
+# peft, transformers 라이브러리를 활용한 예시
 
 ---
 
@@ -262,7 +263,7 @@ for epoch in range(num_epochs):
 
 문서: [https://huggingface.co/docs/peft/v0.8.2/en/package_reference/prompt_tuning#peft.PromptTuningConfig](https://huggingface.co/docs/peft/v0.8.2/en/package_reference/prompt_tuning#peft.PromptTuningConfig)
 
-## 마무리
+# 마무리
 
 ---
 
@@ -274,7 +275,7 @@ for epoch in range(num_epochs):
 
 더 자세한 정보와 연구 결과는 [Guiding Frozen Language Models with Learned Soft Prompts](https://blog.research.google/2022/02/guiding-frozen-language-models-with.html)를 참고하세요.
 
-## Reference
+# Reference
 
 [https://arxiv.org/pdf/2104.08691.pdf](https://arxiv.org/pdf/2104.08691.pdf)
 
