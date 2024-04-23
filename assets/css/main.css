@@ -61,13 +61,15 @@
     margin: 60px auto; }
 
   .section-nav {
+    border-radius: 6px;
+    border: 1px solid #e7e5e5;
     position: fixed;
-    /* right: 20px; */
     left: 50%;
-    transform: translateX(450px);
+    transform: translateX(430px);
     top: 200px;
-    width: 250px; 
-    max-height: 90vh;
+    width: 200px; 
+    padding: 5px;
+    font-size: 13px;
     overflow-y: auto; }
 
 /* =Header *//*************************************************************/
