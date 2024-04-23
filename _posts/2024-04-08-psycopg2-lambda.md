@@ -5,7 +5,6 @@ subtitle: "Python version 3.12, Docker"
 date:   2024-04-08 14:31:24 +0530
 categories: Dev
 author: "Harheem Kim"
-toc: true
 ---
 
 # How to use psycopg2 with Python version 3.12 in an AWS Lambda

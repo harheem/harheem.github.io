@@ -58,18 +58,7 @@
 
   .wrapper {
     max-width: 800px;
-    margin: 60px auto; 
-    position: relative;
-  }
-
-  .section-nav {
-    position: fixed;
-    right: 20px;
-    top: 80px;
-    width: 250px; 
-    max-height: 90vh;
-    overflow-y: auto;
-  }
+    margin: 60px auto; }
 
 /* =Header *//*************************************************************/
   .header {
