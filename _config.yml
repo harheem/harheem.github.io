@@ -21,3 +21,6 @@ styles: [agate, androidstudio, arta, asceti, atelier-cave.dark, atelier-cave.lig
 # Build settings
 highlighter: null
 markdown: kramdown
+
+# SEO
+google-site-verification: "y3JA1Sa5UQWsQxHUHQ3a1ig6seBDRsz1fG3H1V-_vnQ"
