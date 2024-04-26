@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "LLM Agents"
-subtitle: "Prompt Engineering Guide - LLM Agents"
+subtitle: "Prompt Engineering Guide 한글화 - LLM Agents"
 date:   2024-02-28 11:21:21 +0530
 categories: LLM
 author: "Harheem Kim"
@@ -9,7 +9,7 @@ author: "Harheem Kim"
 
 # LLM Agents
 
-[LLM Agents – Nextra](https://www.promptingguide.ai/kr/research/llm-agents)
+[Prompt Engineering Guide - LLM Agents](https://www.promptingguide.ai/kr/research/llm-agents)
 
 [Translate llm-agents.en.mdx to Korean in llm-agents.kr.mdx by harheem · Pull Request #406 · dair-ai/Prompt-Engineering-Guide](https://github.com/dair-ai/Prompt-Engineering-Guide/pull/406#event-11954600373)
 
