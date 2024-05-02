@@ -5,7 +5,9 @@
         <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title> RAG for LLMs — Prompt Engineering Guide - RAG for LLMs  | harheem</title>
+<title> RAG for LLMs — Prompt Engineering Guide 한글화 - RAG for LLMs  | harheem</title>
+<meta name="description" content="A simple, minimal Jekyll theme for a personal web page and blog, focusing on white space and readability
+">
 <meta name="keywords" content="">
 <link rel="canonical" href="/llm/2024/03/08/rag.html">
         <link rel="icon" type="image/jpeg" href="/assets/img/pudhina.jpg"/>
@@ -21,7 +23,7 @@
         <div class="section-nav">
             <ul><li>
 <div class="page-title__text">RAG for LLMs</div>
-<div class="page-title__subtitle">Prompt Engineering Guide - RAG for LLMs</div>
+<div class="page-title__subtitle">Prompt Engineering Guide 한글화 - RAG for LLMs</div>
 </li><li><a href="#retrieval-augmented-generation-rag-for-llms"><strong>Retrieval Augmented Generation (RAG) for LLMs</strong></a></li><li><a href="#rag란"><strong>RAG란?</strong></a></li><li><a href="#rag-paradigms"><strong>RAG Paradigms</strong></a><ul><li><a href="#naive-rag"><strong>Naive RAG</strong></a><ul><li><a href="#naive-rag-1"><strong>Naive RAG</strong></a></li></ul></li><li><a href="#advanced-rag"><strong>Advanced RAG</strong></a></li><li><a href="#modular-rag"><strong>Modular RAG</strong></a></li></ul></li><li><a href="#rag-프레임워크"><strong>RAG 프레임워크</strong></a><ul><li><a href="#검색"><strong>검색</strong></a></li><li><a href="#생성"><strong>생성</strong></a></li><li><a href="#증강"><strong>증강</strong></a></li><li><a href="#rag-vs-파인-튜닝"><strong>RAG vs. 파인 튜닝</strong></a></li></ul></li><li><a href="#rag-평가"><strong>RAG 평가</strong></a></li><li><a href="#rag의-도전과제와-미래"><strong>RAG의 도전과제와 미래</strong></a></li><li><a href="#rag-도구"><strong>RAG 도구</strong></a></li><li><a href="#결론"><strong>결론</strong></a></li><li><a href="#rag-연구-인사이트"><strong>RAG 연구 인사이트</strong></a></li></ul></li></ul>
         </div>
         <div class="wrapper">
@@ -53,10 +55,14 @@
 </header>
             <h1 class="page-title">
 <div class="page-title__text">RAG for LLMs</div>
-<div class="page-title__subtitle">Prompt Engineering Guide - RAG for LLMs</div>
+<div class="page-title__subtitle">Prompt Engineering Guide 한글화 - RAG for LLMs</div>
 </h1>
 
 <h1 id="retrieval-augmented-generation-rag-for-llms"><strong>Retrieval Augmented Generation (RAG) for LLMs</strong></h1>
+
+<p><a href="https://www.promptingguide.ai/kr/research/rag">Prompt Engineering Guide - RAG for LLMs</a></p>
+
+<p><a href="https://github.com/dair-ai/Prompt-Engineering-Guide/pull/442">Translate rag.en.mdx to Korean in rag.kr.mdx by harheem · Pull Request #442 · dair-ai/Prompt-Engineering-Guide</a></p>
 
 <p>Retrieval Augmented Generation(RAG)은 대규모 언어 모델, 즉 LLM(Large Language Models)의 한계를 해결하기 위한 효과적인 방법입니다. 이 방식은 데이터베이스 같은 외부 지식원을 LLM에 결합시켜, 도메인 지식의 격차, 사실적 오류, 그리고 잘못된 정보 생성(hallucination)과 같은 문제들을 줄일 수 있습니다. 특히, 지속적으로 변화하고 업데이트되는 정보가 필요한 분야나 특정한 응용 프로그램에서 RAG는 큰 장점을 가지게 됩니다. RAG의 뛰어난 점은 특정 작업이나 응용 프로그램에 맞추어 LLM을 다시 학습시킬 필요가 없다는 것입니다. 최근에는 대화형 에이전트 분야에서 RAG의 활용이 늘어나며 그 인기가 많아지고 있습니다.</p>
 

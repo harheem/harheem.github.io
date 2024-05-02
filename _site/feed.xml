@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-04-24T23:28:47+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">harheem</title><subtitle>A simple, minimal Jekyll theme for a personal web page and blog, focusing on white space and readability
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-05-02T16:25:19+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">harheem</title><subtitle>A simple, minimal Jekyll theme for a personal web page and blog, focusing on white space and readability
 </subtitle><author><name>{&quot;fullname&quot;=&gt;&quot;Harheem Kim&quot;, &quot;github&quot;=&gt;&quot;harheem&quot;, &quot;linkedin&quot;=&gt;&quot;harheemk&quot;, &quot;email&quot;=&gt;&quot;shhr.kre@gmail.com&quot;}</name><email>shhr.kre@gmail.com</email></author><entry><title type="html">Can you calculate a vector database by hand?</title><link href="http://localhost:4000/ai-by-hand/2024/04/23/AI-by-hand-vector-database.html" rel="alternate" type="text/html" title="Can you calculate a vector database by hand?" /><published>2024-04-23T15:22:24+09:00</published><updated>2024-04-23T15:22:24+09:00</updated><id>http://localhost:4000/ai-by-hand/2024/04/23/AI-by-hand-vector-database</id><content type="html" xml:base="http://localhost:4000/ai-by-hand/2024/04/23/AI-by-hand-vector-database.html"><![CDATA[<h1 id="vector-database">Vector Database</h1>
 <p><a href="https://www.linkedin.com/posts/tom-yeh_vectordatabase-rag-deeplearning-activity-7158816842730336257-BaSm/?utm_source=share&amp;utm_medium=member_desktop">14. Can you calculate a vector database by hand? - Tom Yeh</a></p>
 
@@ -71,7 +71,86 @@
   </li>
 </ol>
 
-<p>결론적으로, HNSW는 계층적 구조와 효율적인 네비게이션 전략을 통해 빠르고 정확한 최근접 이웃 검색을 실현합니다. 이는 대규모 데이터베이스와 실시간 시스템에서의 응용에 매우 적합합니다.</p>]]></content><author><name>Harheem Kim</name></author><category term="AI-by-Hand" /><summary type="html"><![CDATA[Vector Database 14. Can you calculate a vector database by hand? - Tom Yeh]]></summary></entry><entry><title type="html">How to use psycopg2 in an AWS Lambda</title><link href="http://localhost:4000/dev/2024/04/08/psycopg2-lambda.html" rel="alternate" type="text/html" title="How to use psycopg2 in an AWS Lambda" /><published>2024-04-08T18:01:24+09:00</published><updated>2024-04-08T18:01:24+09:00</updated><id>http://localhost:4000/dev/2024/04/08/psycopg2-lambda</id><content type="html" xml:base="http://localhost:4000/dev/2024/04/08/psycopg2-lambda.html"><![CDATA[<h1 id="how-to-use-psycopg2-with-python-version-312-in-an-aws-lambda">How to use psycopg2 with Python version 3.12 in an AWS Lambda</h1>
+<p>결론적으로, HNSW는 계층적 구조와 효율적인 네비게이션 전략을 통해 빠르고 정확한 최근접 이웃 검색을 실현합니다. 이는 대규모 데이터베이스와 실시간 시스템에서의 응용에 매우 적합합니다.</p>]]></content><author><name>Harheem Kim</name></author><category term="AI-by-Hand" /><summary type="html"><![CDATA[Vector Database 14. Can you calculate a vector database by hand? - Tom Yeh]]></summary></entry><entry><title type="html">DEVOCEAN OpenLab 스터디 - LLMOps 지원 &amp;amp; 킥오프 후기</title><link href="http://localhost:4000/devocean/2024/04/20/devocean-llmops-study-01.html" rel="alternate" type="text/html" title="DEVOCEAN OpenLab 스터디 - LLMOps 지원 &amp;amp; 킥오프 후기" /><published>2024-04-20T00:22:24+09:00</published><updated>2024-04-20T00:22:24+09:00</updated><id>http://localhost:4000/devocean/2024/04/20/devocean-llmops-study-01</id><content type="html" xml:base="http://localhost:4000/devocean/2024/04/20/devocean-llmops-study-01.html"><![CDATA[<h2 id="devocean-openlab">DEVOCEAN OpenLab?</h2>
+<p><a href="https://devocean.sk.com/community/detail.do?ID=165736&amp;boardType=DEVOCEAN_STUDY&amp;page=&amp;subIndex=&amp;searchData=">AI 중심의 오픈 스터디 프로그램 데보션 오픈랩</a>
+<img src="../../../../assets/img/Devocean/Pasted image 20240502144454.png" alt="image" />
+<img src="../../../../assets/img/Devocean/Pasted image 20240502144438.png" alt="image" /></p>
+
+<h2 id="llmops에-지원하다">LLMOps에 지원하다</h2>
+<p><img src="../../../../assets/img/Devocean/Pasted image 20240502150025.png" alt="image" />
+이 오픈랩 스터디의 모집 공고를 보는 순간, ‘바로 이거다’라고 생각했습니다. 특히, LLMOps 스터디는 제가 하고 싶었던 것과 딱 맞았기에 마치 저를 위해 준비된 것처럼 보였습니다.</p>
+
+<h3 id="지원서-내용">지원서 내용</h3>
+
+<p>저는 다음의 내용으로 지원서를 작성하였습니다.</p>
+
+<h4 id="현재-하고-있는-일">현재 하고 있는 일</h4>
+<ul>
+  <li>업무
+    <ul>
+      <li>모빌리티 스타트업에서 AI 기반 여행 일정표 제작 서비스인 ‘플래너’에서 핵심 알고리즘 개발을 담당</li>
+      <li>플래너 팀의 팀장으로서, 회의 진행과 프로젝트 관리를 책임지며 팀을 리딩</li>
+    </ul>
+  </li>
+  <li>관심분야
+    <ul>
+      <li>Large Language Models(LLM)</li>
+      <li>프롬프트 엔지니어링</li>
+      <li>사용자 경험 향상</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="지원-동기-요약">지원 동기 요약</h4>
+
+<ul>
+  <li>나
+    <ul>
+      <li>개인적으로 챗봇을 개발해 본 경험이 있음</li>
+      <li>실제 비즈니스에 적용할 만한 챗봇 개발이 어려웠음:
+        <ul>
+          <li>복잡한 사용자 질문에 정확하고 일관된 대응이 필요</li>
+          <li>언어적 뉘앙스와 문맥을 정확히 해석해야 함</li>
+          <li>답변의 질을 지속적으로 모니터링 및 평가하는 시스템 필요</li>
+        </ul>
+      </li>
+      <li>전체 파이프라인 구축 능력이 부족함</li>
+    </ul>
+  </li>
+  <li>원하는 것
+    <ul>
+      <li>LLMOps 스터디를 통한 해결책 및 전문가 지식 습득 기대</li>
+      <li>스터디를 통한 챗봇 솔루션 성능 개선 및 사용자 경험 향상 목표</li>
+      <li>LLMOps 분야의 전문가로 성장하고 조직 내 AI 프로젝트를 성공적으로 이끌고 싶음</li>
+      <li><strong>LLMOps 스터디에서 열정적인 동료들과 교류 및 함께 성장하길 기대</strong></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="스터디-킥오프">스터디 킥오프</h2>
+<p>13명의 참가자와 외부 구성원 3명, AI Fellowship 프로그램에 참여할 대학생들이 이번 스터디에 참여하게 되었습니다. 스터디 참가자들은 대학생부터 현직 전문가에 이르기까지 다양하며, 각자의 전문 분야가 있지만 공통적으로 챗봇 개발에 대한 큰 열정을 가지고 있다는 것을 느꼈습니다.</p>
+
+<h3 id="스터디-목표">스터디 목표</h3>
+
+<p>LLMOps 스터디의 주요 목표는 다음과 같습니다:</p>
+<ul>
+  <li><strong>Better RAG 기술을 적용한 Devot 챗봇의 런칭 준비</strong></li>
+  <li><strong>LLM 평가 및 모니터링 체계의 구축</strong></li>
+</ul>
+
+<p>Devot은 Devocean에서 개발한 챗봇으로, 현재 베타 테스트(CBT) 단계에 있습니다. 스터디를 통해 Devot의 성능을 개선하고, 평가 및 모니터링 시스템을 개발하는 것이 주된 목적입니다.</p>
+
+<h3 id="다음-모임">다음 모임</h3>
+
+<p>스터디의 첫 모임은 2024년 4월 25일 목요일입니다. 이 날 <strong>각자 AI 챗봇 관련 업무에 대해 소개하는 발표</strong>를 하기로 하였습니다. 멘토님은 이 자료를 바탕으로 LLMOps의 End-to-End(E2E) 파이프라인 구축을 위한 역할 및 책임(R&amp;R)을 수립할 계획이라고 하셨습니다. 구성원의 특성에 맞추어 스터디 계획을 조정하려는 멘토님의 배려에 큰 인상을 받았던 순간이었습니다.</p>
+
+<h3 id="소감">소감</h3>
+
+<p>우선, 정말 참여하고 싶었던 스터디에 참가할 수 있게 되어 매우 기뻤습니다. 합격 문자를 받았을 때는 너무 기뻐 주위 사람들에게 전하면서 방방 뛰기도 했습니다.</p>
+
+<p>이번 스터디에는 굉장하신 분들이 많이 모여있어서 긴장도 되고 기대가 됩니다. 저는 전문가가 아니기 때문에 그만큼 더 열심히 공부하고, 공부한 내용을 나누어 좋은 영향력을 전파하고 싶습니다. 이 생각을 3개월 동안 잊지 않고 끝까지 최선을 다하겠습니다.</p>
+
+<p>읽어주셔서 감사합니다.</p>]]></content><author><name>Harheem Kim</name></author><category term="Devocean" /><summary type="html"><![CDATA[DEVOCEAN OpenLab? AI 중심의 오픈 스터디 프로그램 데보션 오픈랩]]></summary></entry><entry><title type="html">How to use psycopg2 in an AWS Lambda</title><link href="http://localhost:4000/dev/2024/04/08/psycopg2-lambda.html" rel="alternate" type="text/html" title="How to use psycopg2 in an AWS Lambda" /><published>2024-04-08T18:01:24+09:00</published><updated>2024-04-08T18:01:24+09:00</updated><id>http://localhost:4000/dev/2024/04/08/psycopg2-lambda</id><content type="html" xml:base="http://localhost:4000/dev/2024/04/08/psycopg2-lambda.html"><![CDATA[<h1 id="how-to-use-psycopg2-with-python-version-312-in-an-aws-lambda">How to use psycopg2 with Python version 3.12 in an AWS Lambda</h1>
 
 <blockquote>
   <p>This article describes how to use psycopg2 with Python version 3.12 in an AWS Lambda environment. The process involves adjusting and applying methods verified in Python 3.9 to suit the Python 3.12 environment.</p>
@@ -143,6 +222,10 @@
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>arn:aws:lambda:ap-northeast-2:550316102722:layer:psycopg2-binary-arm64-312:1
 </code></pre></div></div>]]></content><author><name>Harheem Kim</name></author><category term="Dev" /><summary type="html"><![CDATA[How to use psycopg2 with Python version 3.12 in an AWS Lambda]]></summary></entry><entry><title type="html">RAG for LLMs</title><link href="http://localhost:4000/llm/2024/03/08/rag.html" rel="alternate" type="text/html" title="RAG for LLMs" /><published>2024-03-08T21:56:55+09:00</published><updated>2024-03-08T21:56:55+09:00</updated><id>http://localhost:4000/llm/2024/03/08/rag</id><content type="html" xml:base="http://localhost:4000/llm/2024/03/08/rag.html"><![CDATA[<h1 id="retrieval-augmented-generation-rag-for-llms"><strong>Retrieval Augmented Generation (RAG) for LLMs</strong></h1>
+
+<p><a href="https://www.promptingguide.ai/kr/research/rag">Prompt Engineering Guide - RAG for LLMs</a></p>
+
+<p><a href="https://github.com/dair-ai/Prompt-Engineering-Guide/pull/442">Translate rag.en.mdx to Korean in rag.kr.mdx by harheem · Pull Request #442 · dair-ai/Prompt-Engineering-Guide</a></p>
 
 <p>Retrieval Augmented Generation(RAG)은 대규모 언어 모델, 즉 LLM(Large Language Models)의 한계를 해결하기 위한 효과적인 방법입니다. 이 방식은 데이터베이스 같은 외부 지식원을 LLM에 결합시켜, 도메인 지식의 격차, 사실적 오류, 그리고 잘못된 정보 생성(hallucination)과 같은 문제들을 줄일 수 있습니다. 특히, 지속적으로 변화하고 업데이트되는 정보가 필요한 분야나 특정한 응용 프로그램에서 RAG는 큰 장점을 가지게 됩니다. RAG의 뛰어난 점은 특정 작업이나 응용 프로그램에 맞추어 LLM을 다시 학습시킬 필요가 없다는 것입니다. 최근에는 대화형 에이전트 분야에서 RAG의 활용이 늘어나며 그 인기가 많아지고 있습니다.</p>
 
@@ -612,7 +695,7 @@
   </tbody>
 </table>]]></content><author><name>Harheem Kim</name></author><category term="LLM" /><summary type="html"><![CDATA[Retrieval Augmented Generation (RAG) for LLMs]]></summary></entry><entry><title type="html">LLM Agents</title><link href="http://localhost:4000/llm/2024/02/28/llm-agents.html" rel="alternate" type="text/html" title="LLM Agents" /><published>2024-02-28T14:51:21+09:00</published><updated>2024-02-28T14:51:21+09:00</updated><id>http://localhost:4000/llm/2024/02/28/llm-agents</id><content type="html" xml:base="http://localhost:4000/llm/2024/02/28/llm-agents.html"><![CDATA[<h1 id="llm-agents">LLM Agents</h1>
 
-<p><a href="https://www.promptingguide.ai/kr/research/llm-agents">LLM Agents – Nextra</a></p>
+<p><a href="https://www.promptingguide.ai/kr/research/llm-agents">Prompt Engineering Guide - LLM Agents</a></p>
 
 <p><a href="https://github.com/dair-ai/Prompt-Engineering-Guide/pull/406#event-11954600373">Translate llm-agents.en.mdx to Korean in llm-agents.kr.mdx by harheem · Pull Request #406 · dair-ai/Prompt-Engineering-Guide</a></p>
 

@@ -18,6 +18,21 @@
   
     
     <url>
+      <loc>http://localhost:4000/devocean/2024/04/20/devocean-llmops-study-01.html/</loc>
+      
+        <lastmod>2024-04-20T00:22:24+09:00</lastmod>
+      
+      
+        <changefreq>monthly</changefreq>
+      
+      
+        <priority>0.7</priority>
+      
+    </url>
+    
+  
+    
+    <url>
       <loc>http://localhost:4000/dev/2024/04/08/psycopg2-lambda.html/</loc>
       
         <lastmod>2024-04-08T18:01:24+09:00</lastmod>
@@ -96,7 +111,7 @@
     <url>
       <loc>http://localhost:4000/blog.html</loc>
       
-        <lastmod>2024-04-24T23:28:47+09:00</lastmod>
+        <lastmod>2024-05-02T16:25:19+09:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -111,7 +126,7 @@
     <url>
       <loc>http://localhost:4000/</loc>
       
-        <lastmod>2024-04-24T23:28:47+09:00</lastmod>
+        <lastmod>2024-05-02T16:25:19+09:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -126,7 +141,7 @@
     <url>
       <loc>http://localhost:4000/resume.html</loc>
       
-        <lastmod>2024-04-24T23:28:47+09:00</lastmod>
+        <lastmod>2024-05-02T16:25:19+09:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -145,7 +160,7 @@
     <url>
       <loc>http://localhost:4000/feed.xml</loc>
       
-        <lastmod>2024-04-24T23:28:47+09:00</lastmod>
+        <lastmod>2024-05-02T16:25:19+09:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
