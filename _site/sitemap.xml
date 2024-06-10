@@ -33,6 +33,21 @@
   
     
     <url>
+      <loc>http://localhost:4000/devocean/2024/05/24/devocean-autorag-query-expansion.html/</loc>
+      
+        <lastmod>2024-05-24T14:22:24+09:00</lastmod>
+      
+      
+        <changefreq>monthly</changefreq>
+      
+      
+        <priority>0.7</priority>
+      
+    </url>
+    
+  
+    
+    <url>
       <loc>http://localhost:4000/ai-by-hand/2024/04/23/AI-by-hand-vector-database.html/</loc>
       
         <lastmod>2024-04-23T15:22:24+09:00</lastmod>
@@ -141,7 +156,7 @@
     <url>
       <loc>http://localhost:4000/blog.html</loc>
       
-        <lastmod>2024-06-10T13:56:39+09:00</lastmod>
+        <lastmod>2024-06-10T15:12:23+09:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -156,7 +171,7 @@
     <url>
       <loc>http://localhost:4000/</loc>
       
-        <lastmod>2024-06-10T13:56:39+09:00</lastmod>
+        <lastmod>2024-06-10T15:12:23+09:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -171,7 +186,7 @@
     <url>
       <loc>http://localhost:4000/resume.html</loc>
       
-        <lastmod>2024-06-10T13:56:39+09:00</lastmod>
+        <lastmod>2024-06-10T15:12:23+09:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
@@ -190,7 +205,7 @@
     <url>
       <loc>http://localhost:4000/feed.xml</loc>
       
-        <lastmod>2024-06-10T13:56:39+09:00</lastmod>
+        <lastmod>2024-06-10T15:12:23+09:00</lastmod>
       
       
         <changefreq>monthly</changefreq>
