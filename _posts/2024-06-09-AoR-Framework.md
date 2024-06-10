@@ -57,25 +57,25 @@ AoR 접근 방식은 Local-Scoring과 Global-Evaluation의 두 단계로 구성�
 ### <span style="font-weight: normal">📝</span> 프롬프트 설명 
 
 ##### Standard Prompting
-**Standard Prompting**은 LLM(Large Language Model)이 질문$Q$와 프롬프트$T$를 입력으로 받아, 답변$A$의 각 토큰을 순차적으로 생성합니다. 이때 각 단계에서의 가능성을 최대화하기 위해 답변을 생성합니다. 수식으로는 다음과 같이 표현됩니다:
+**Standard Prompting**은 LLM(Large Language Model)이 질문 $`Q`$와 프롬프트 $`T`$를 입력으로 받아, 답변 $`A`$의 각 토큰을 순차적으로 생성합니다. 이때 각 단계에서의 가능성을 최대화하기 위해 답변을 생성합니다. 수식으로는 다음과 같이 표현됩니다:
 
-$P(A \mid T, Q) = \prod_{i=1}^{|A|} P_M(a_i \mid T, Q, a_{<i})$
+$$P(A \mid T, Q) = \prod_{i=1}^{|A|} P_M(a_i \mid T, Q, a_{\lt i})$$
 
-여기서 $P(A \mid T, Q)$는 $T$와 $Q$를 입력으로 한 답변 $A$의 확률을 나타냅니다.
+여기서 $`P(A \mid T, Q)`$는 $`T`$와 $`Q`$를 입력으로 한 답변 $`A`$의 확률을 나타냅니다.
 
 ##### CoT Prompting
-**CoT(Chain of Thought) Prompting**은 프롬프트 $T$를 개선하여 문제 해결 과정을 강화하고, 답변 $A$를 생성하기 전에 논리적 추론을 $R$로 통합하도록 LLM을 유도합니다. $R$과 $A$의 쌍을 reasoning chain이라 부릅니다. CoT 프롬프트의 확률은 다음과 같이 표현됩니다:
+**CoT(Chain of Thought) Prompting**은 프롬프트 $`T`$를 개선하여 문제 해결 과정을 강화하고, 답변 $`A`$를 생성하기 전에 논리적 추론을 $R$로 통합하도록 LLM을 유도합니다. $`R`$과 $`A`$의 쌍을 reasoning chain이라 부릅니다. CoT 프롬프트의 확률은 다음과 같이 표현됩니다:
 
-$P(R, A \mid T, Q) = P(A \mid T, Q, R)P(R \mid T, Q)$
+$$P(R, A \mid T, Q) = P(A \mid T, Q, R)P(R \mid T, Q)$$
 
-여기서 $P(R \mid T, Q)$와 $P(A \mid T, Q, R)$는 각각 다음과 같이 정의됩니다:
-$P(R \mid T, Q) = \prod_{i=1}^{|R|} P_M(r_i \mid T, Q, r_{<i})$
-$P(A \mid T, Q, R) = \prod_{j=1}^{|A|} P_M(a_j \mid T, Q, R, a_{<j})$
+여기서 $`P(R \mid T, Q)`$와 $`P(A \mid T, Q, R)`$는 각각 다음과 같이 정의됩니다:
+$$P(R \mid T, Q) = \prod_{i=1}^{|R|} P_M(r_i \mid T, Q, r_{\lt i})$$
+$$P(A \mid T, Q, R) = \prod_{j=1}^{|A|} P_M(a_j \mid T, Q, R, a_{\lt j})$$
 
 ##### Self-Consistency
-**Self-Consistency**는 CoT를 사용하여 n개의 추론 체인을 샘플링합니다. 각 추론 체인은 답변$A$와 함께 여러 개의 reasoning chains $(R_i, A_i)$로 구성됩니다. Self-Consistency는 각 추론 체인에서 가장 빈번하게 등장하는 답을 최종 답으로 선택합니다. 이 접근 방식은 다음과 같이 표현됩니다:
+**Self-Consistency**는 CoT를 사용하여 n개의 추론 체인을 샘플링합니다. 각 추론 체인은 답변 $`A`$와 함께 여러 개의 reasoning chains $`(R_i, A_i)`$로 구성됩니다. Self-Consistency는 각 추론 체인에서 가장 빈번하게 등장하는 답을 최종 답으로 선택합니다. 이 접근 방식은 다음과 같이 표현됩니다:
 
-$A^* = \arg \max_a [(\{(R_i, A_i)\mid A_i = a\}]$
+$$A^* = \arg \max_a [(\{(R_i, A_i)\mid A_i = a\}]$$
 
 이는 가장 자주 등장하는 답변이 최종 답변으로 선택됨을 의미합니다.
 
